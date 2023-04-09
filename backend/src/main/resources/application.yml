@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    include: secret
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+      generate-ddl: true
+      show-sql: true
+      properties:
+        hibernate:
+          format_sql: true
+
+
