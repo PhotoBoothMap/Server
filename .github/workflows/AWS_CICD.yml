@@ -48,6 +48,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        role-session-name: GitHubActions
 
       # (5) 빌드 결과물을 S3 버킷에 업로드
     - name: Upload to AWS S3
