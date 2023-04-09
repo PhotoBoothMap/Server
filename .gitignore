@@ -202,13 +202,10 @@ $RECYCLE.BIN/
 *#
 *.iml
 *.ipr
-*.iws
-*.jar
 *.sw?
 *~
 .#*
 .*.md.html
-.DS_Store
 .attach_pid*
 .classpath
 .factorypath
@@ -243,4 +240,5 @@ secrets.yml
 .sts4-cache
 
 application-secret.yml
+!gradle/wrapper/gradle-wrapper.jar
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,intellij,java
