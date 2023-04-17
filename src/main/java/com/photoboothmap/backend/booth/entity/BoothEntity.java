@@ -2,6 +2,7 @@ package com.photoboothmap.backend.booth.entity;
 
 import com.photoboothmap.backend.brand.entity.BrandEntity;
 import com.photoboothmap.backend.util.entity.BaseTimeEntity;
+import com.photoboothmap.backend.util.entity.BoothType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class BoothEntity extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long boothIdx;
 
+    @Column(nullable = false)
+    private Long confirmId;
+
     @ManyToOne
     @JoinColumn(name = "brandIdx")
     private BrandEntity brandIdx;
@@ -43,6 +47,14 @@ public class BoothEntity extends BaseTimeEntity {
 
     @Column(nullable = false)
     private float yCoordinate;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BoothType boothType;
+
+    private String tel;
+
+    private String homepage;
 
     @Column(columnDefinition = "varchar(10) default 'active'")
     private String status;
