@@ -49,6 +49,12 @@ public class BoothEntity extends BaseTimeEntity {
     private float yCoordinate;
 
     @Column(nullable = false)
+    private float latitude;
+
+    @Column(nullable = false)
+    private float longitude;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BoothType boothType;
 
