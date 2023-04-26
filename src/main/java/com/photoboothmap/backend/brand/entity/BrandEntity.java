@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -27,7 +28,7 @@ public class BrandEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "varchar(10) default 'active'")
+    @ColumnDefault("active")
     private String status;
 
 }
