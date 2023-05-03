@@ -63,7 +63,7 @@ public class BoothEntity extends BaseTimeEntity {
 
     private String homepage;
 
-    @ColumnDefault("active")
+    @ColumnDefault("'active'")
     private String status;
 
 }

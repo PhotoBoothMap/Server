@@ -44,7 +44,7 @@ public class UserEntity extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @ColumnDefault("active")
+    @ColumnDefault("'active'")
     private String status;
 
 }

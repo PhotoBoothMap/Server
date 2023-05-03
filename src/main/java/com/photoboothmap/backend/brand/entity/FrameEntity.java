@@ -36,6 +36,6 @@ public class FrameEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private int price;
 
-    @ColumnDefault("active")
+    @ColumnDefault("'active'")
     private String status;
 }
