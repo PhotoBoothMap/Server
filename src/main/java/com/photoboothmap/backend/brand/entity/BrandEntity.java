@@ -28,7 +28,7 @@ public class BrandEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @ColumnDefault("active")
+    @ColumnDefault("'active'")
     private String status;
 
 }

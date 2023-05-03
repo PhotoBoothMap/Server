@@ -43,7 +43,7 @@ public class ReviewEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private Float starRate;
 
-    @ColumnDefault("active")
+    @ColumnDefault("'active'")
     private String status;
 
 }
