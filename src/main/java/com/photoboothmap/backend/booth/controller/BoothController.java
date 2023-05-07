@@ -26,4 +26,16 @@ public class BoothController {
         return new BaseResponse<>(boothList).convert();
     }
 
+    @ResponseBody
+    @GetMapping("/map/list")
+    public ResponseEntity<BaseResponse> getBoothList(
+            @RequestParam Double curx,
+            @RequestParam Double cury,
+            @RequestParam int count) {
+        System.out.println("curx(lng) = " + curx);
+        System.out.println("cury(lat) = " + cury);
+        Map<String, Object> boothList = boothService.getBoothList(curx, cury, count);
+        return new BaseResponse<>(boothList).convert();
+    }
+
 }
