@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
-    Long countByBoothIdx_BoothIdx(Long boothIdx);
+    Long countByPhotoBooth_Id(Long boothIdx);
 
-    @Query(value = "select avg(star_rate) from whereisphoto.review where booth_idx = :boothIdx"
+    @Query(value = "select avg(star_rate) from review where photo_booth = :boothIdx"
             , nativeQuery = true)
     Float averageStarRateByBoothIdx(Long boothIdx);
 }
