@@ -27,15 +27,15 @@ public class ReviewEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long brandIdx;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "boothIdx")
-    private BoothEntity boothIdx;
+    private BoothEntity photoBooth;
 
     @ManyToOne
     @JoinColumn(name = "userIdx")
-    private UserEntity userIdx;
+    private UserEntity user;
 
     @Column(nullable = false)
     private String content;

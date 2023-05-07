@@ -23,15 +23,15 @@ import javax.persistence.*;
 public class FrameEntity extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long frameIdx;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "brandIdx")
-    private BrandEntity brandIdx;
+    private BrandEntity brand;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private FrameShape frameShape;
+    private FrameShape shape;
 
     @Column(nullable = false)
     private int price;

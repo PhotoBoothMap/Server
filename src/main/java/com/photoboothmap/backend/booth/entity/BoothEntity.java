@@ -25,14 +25,14 @@ public class BoothEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long boothIdx;
+    private Long id;
 
     @Column(nullable = false)
     private Long confirmId;
 
     @ManyToOne
     @JoinColumn(name = "brandIdx")
-    private BrandEntity brandIdx;
+    private BrandEntity brand;
 
     @Column(nullable = false)
     private String name;
