@@ -15,7 +15,6 @@ public class BoothController {
     private final BoothService boothService;
 
     @ResponseBody
-    @ResponseBody
     @GetMapping("/map")
     public ResponseEntity<BaseResponse> getBoothMap(
             @RequestParam Double curx,
