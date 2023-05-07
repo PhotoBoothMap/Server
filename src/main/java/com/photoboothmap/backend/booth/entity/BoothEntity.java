@@ -31,7 +31,7 @@ public class BoothEntity extends BaseTimeEntity {
     private Long confirmId;
 
     @ManyToOne
-    @JoinColumn(name = "brandIdx")
+    @JoinColumn(name = "brand")
     private BrandEntity brand;
 
     @Column(nullable = false)

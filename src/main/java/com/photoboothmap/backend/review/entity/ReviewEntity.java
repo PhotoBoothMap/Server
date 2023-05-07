@@ -30,11 +30,11 @@ public class ReviewEntity extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "boothIdx")
+    @JoinColumn(name = "photoBooth")
     private BoothEntity photoBooth;
 
     @ManyToOne
-    @JoinColumn(name = "userIdx")
+    @JoinColumn(name = "user")
     private UserEntity user;
 
     @Column(nullable = false)

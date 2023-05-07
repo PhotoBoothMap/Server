@@ -26,7 +26,7 @@ public class FrameEntity extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "brandIdx")
+    @JoinColumn(name = "brand")
     private BrandEntity brand;
 
     @Column(nullable = false)
