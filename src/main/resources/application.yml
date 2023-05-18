@@ -14,3 +14,14 @@ spring:
           format_sql: true
 
 
+
+  # redis Config
+redis:
+  host: localhost
+  port: 6379
+
+# logging
+logging:
+  level:
+    org.apache.http: DEBUG
+    httpclient.wire: DEBUG
