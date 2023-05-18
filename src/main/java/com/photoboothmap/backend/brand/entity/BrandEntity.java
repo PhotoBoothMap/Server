@@ -23,7 +23,7 @@ public class BrandEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long brandIdx;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
