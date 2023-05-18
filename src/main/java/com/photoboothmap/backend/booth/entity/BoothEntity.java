@@ -25,14 +25,14 @@ public class BoothEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long boothIdx;
+    private Long id;
 
     @Column(nullable = false)
     private Long confirmId;
 
     @ManyToOne
-    @JoinColumn(name = "brandIdx")
-    private BrandEntity brandIdx;
+    @JoinColumn(name = "brand")
+    private BrandEntity brand;
 
     @Column(nullable = false)
     private String name;
@@ -50,10 +50,10 @@ public class BoothEntity extends BaseTimeEntity {
     private float yCoordinate;
 
     @Column(nullable = false)
-    private float latitude;
+    private Double latitude;
 
     @Column(nullable = false)
-    private float longitude;
+    private Double longitude;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

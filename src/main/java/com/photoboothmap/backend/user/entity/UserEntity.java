@@ -25,7 +25,7 @@ public class UserEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long brandIdx;
+    private Long id;
 
     @Column(nullable = false)
     private String email;
@@ -38,7 +38,7 @@ public class UserEntity extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private LoginType loginType;
+    private LoginType type;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
