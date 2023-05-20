@@ -1,6 +1,7 @@
 package com.photoboothmap.backend.login.member.domain;
 
 
+import com.photoboothmap.backend.util.entity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

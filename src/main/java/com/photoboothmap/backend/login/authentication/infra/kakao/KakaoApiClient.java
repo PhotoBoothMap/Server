@@ -5,6 +5,7 @@ import com.photoboothmap.backend.login.authentication.domain.oauth.OAuthLoginPar
 import com.photoboothmap.backend.login.authentication.domain.oauth.OAuthProvider;
 import com.photoboothmap.backend.login.authentication.domain.oauth.OAuthApiClient;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class KakaoApiClient implements OAuthApiClient {
 
     private static final String GRANT_TYPE = "authorization_code";
@@ -70,7 +72,7 @@ public class KakaoApiClient implements OAuthApiClient {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("property_keys", "[\"kakao_account.email\", \"kakao_account.profile\"]");
-
+        log.info("call request user/me");
         HttpEntity<?> request = new HttpEntity<>(body, httpHeaders);
 
         return restTemplate.postForObject(url, request, KakaoInfoResponse.class);

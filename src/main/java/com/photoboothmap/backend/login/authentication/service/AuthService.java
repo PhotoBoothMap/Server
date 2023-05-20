@@ -17,7 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,10 +35,15 @@ public class AuthService {
     private final String SERVER = "Server";
 
     // 로그인: 인증 정보 저장 및 비어 토큰 발급
-    public AuthTokens login(OAuthLoginParams params) {
+    public Map<String, AuthTokens> login(OAuthLoginParams params) {
         OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
+
+        String nickname = findNickName(oAuthInfoResponse);
+        log.info("nickname: {}", nickname);
+
         Long memberId = findOrCreateMember(oAuthInfoResponse);
-        return authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail());
+//        return authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail());
+        return Map.of(nickname, authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail()));
     }
 
     // RT를 Redis에 저장
@@ -50,9 +55,17 @@ public class AuthService {
                 jwtTokenProvider.getTokenExpirationTime(refreshToken)); // timeout(milliseconds)
     }
 
-    // AT가 만료일자만 초과한 유효한 토큰인지 검사
-    public boolean validate(String requestAccessTokenInHeader) {
+    // AT가 만료일자만 초과한 유효한 토큰인지 검사 - true일 경우 재발급이 필요.
+    public boolean isValidateRequired(String requestAccessTokenInHeader) {
         String requestAccessToken = resolveToken(requestAccessTokenInHeader);
+        try {
+            Long memberId = authTokensGenerator.extractMemberId(requestAccessToken);
+            if (!memberRepository.existsById(memberId)) {
+                return true;
+            }
+        } catch (Exception e) {
+            return true;
+        }
         return jwtTokenProvider.validateAccessTokenOnlyExpired(requestAccessToken); // true = 재발급
     }
 
@@ -112,10 +125,23 @@ public class AuthService {
                 .orElseGet(() -> newMember(oAuthInfoResponse));
     }
 
+    private String findNickName(OAuthInfoResponse oAuthInfoResponse) {
+        return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
+                .map(Member::getNickname)
+                .orElse("default");
+    }
+
+    private String findProfileImage(OAuthInfoResponse oAuthInfoResponse) {
+        return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
+                .map(Member::getProfile_image_url)
+                .orElse("noImage");
+    }
+
     private Long newMember(OAuthInfoResponse oAuthInfoResponse) {
         Member member = Member.builder()
                 .email(oAuthInfoResponse.getEmail())
                 .nickname(oAuthInfoResponse.getNickname())
+                .profile_image_url(oAuthInfoResponse.getProfileImageUrl())
                 .oAuthProvider(oAuthInfoResponse.getOAuthProvider())
                 .role(Member.Role.USER) // 추가.
                 .build();

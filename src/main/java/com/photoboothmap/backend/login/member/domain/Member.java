@@ -28,6 +28,10 @@ public class Member {
     @Enumerated(value = EnumType.STRING) //저장될때는 string으로 저장되도록
     private Role role;
 
+    // 프로필 이미지 url 추가.
+    @Column
+    private String profile_image_url;
+
     private OAuthProvider oAuthProvider;
 
     @Getter
@@ -39,19 +43,20 @@ public class Member {
     }
 
     @Builder
-    public Member(String email, String nickname,  String password, Role role, OAuthProvider oAuthProvider) {
+    public Member(String email, String nickname,  String password, String profile_image_url, Role role, OAuthProvider oAuthProvider) {
         log.info("------------------- role의 값: {}", role);
         log.info("------------------- 이메일 값: {}", email);
         this.email = email;
         this.nickname = nickname;
         this.password = password;
+        this.profile_image_url = profile_image_url;
         this.role = role;
         this.oAuthProvider = oAuthProvider;
     }
 
     public Member update(String name, String picture){
         this.nickname = name;
-//        this.picture = picture;
+        this.profile_image_url = picture;
 
         return this;
     }
