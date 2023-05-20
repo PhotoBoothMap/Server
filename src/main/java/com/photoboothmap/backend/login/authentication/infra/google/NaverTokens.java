@@ -1,3 +1,4 @@
+/*
 package com.photoboothmap.backend.login.authentication.infra.google;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,3 +21,4 @@ public class NaverTokens {
     @JsonProperty("expires_in")
     private String expiresIn;
 }
+*/

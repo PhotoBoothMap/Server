@@ -1,3 +1,4 @@
+/*
 package com.photoboothmap.backend.login.authentication.infra.google;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -35,3 +36,4 @@ public class NaverInfoResponse implements OAuthInfoResponse {
         return OAuthProvider.GOOGLE;
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package com.photoboothmap.backend.login.authentication.infra.google;
 
 import com.photoboothmap.backend.login.authentication.domain.oauth.OAuthApiClient;
@@ -74,3 +75,4 @@ public class NaverApiClient implements OAuthApiClient {
         return (OAuthInfoResponse) restTemplate.postForObject(url, request, NaverInfoResponse.class);
     }
 }
+*/

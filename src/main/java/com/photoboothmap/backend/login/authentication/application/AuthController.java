@@ -1,13 +1,24 @@
 package com.photoboothmap.backend.login.authentication.application;
 
+import com.photoboothmap.backend.home.TestDto;
 import com.photoboothmap.backend.login.authentication.domain.AuthTokens;
-import com.photoboothmap.backend.login.authentication.infra.google.NaverLoginParams;
+//import com.photoboothmap.backend.login.authentication.infra.google.NaverLoginParams;
 import com.photoboothmap.backend.login.authentication.infra.kakao.KakaoLoginParams;
 import com.photoboothmap.backend.login.authentication.service.AuthService;
+import com.photoboothmap.backend.login.common.dto.LoginDto;
+import com.photoboothmap.backend.login.member.domain.Member;
+import com.photoboothmap.backend.login.member.domain.MemberRepository;
+import com.photoboothmap.backend.util.config.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -16,13 +27,24 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final MemberRepository memberRepository;
 
     private final long COOKIE_EXPIRATION = 7776000; // 90일
 
     @PostMapping("/kakao")
-    public ResponseEntity<AuthTokens> loginKakao(@RequestBody KakaoLoginParams params) {
-        // User 등록 및 Refresh Token 저장
-        AuthTokens tokens = authService.login(params);
+    public ResponseEntity<LoginDto> loginKakao(@RequestBody KakaoLoginParams params) {
+        // User 등록 및 Refresh Token 저장, 닉네임 가져오는 로직 추가.
+        Map<String, AuthTokens> maps = authService.login(params);
+
+        // Map의 key, value 를 통해 토큰과 닉네임을 가져온다.
+        AuthTokens tokens = maps.values().stream().findFirst().orElse(null);
+        String nickname = maps.keySet().stream().findFirst().orElse(null);
+
+        Member member = memberRepository.findByNickname(nickname)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        // 닉네임을 통해 profile_image_url를 찾아온다.
+        String profile_image_url = member.getProfile_image_url();
 
         // RT 저장
         HttpCookie httpCookie = ResponseCookie.from("refresh-token", tokens.getRefreshToken())
@@ -31,11 +53,19 @@ public class AuthController {
                 .secure(true)*/
                 .build();
 
+
+        LoginDto loginDto = LoginDto.builder()
+                .nickname(nickname)
+                .profile_image_url(profile_image_url)
+                .build();
+
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, httpCookie.toString())
                 // AT 저장
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokens.getAccessToken())
-                .build();
+                .body(loginDto);
+//                .build();
     }
 
     // 원래 코드: body에 저장 -> header에 저장하는 것으로 변경.
@@ -43,13 +73,13 @@ public class AuthController {
         return ResponseEntity.ok(oAuthLoginService.login(params));
     }*/
 
-    // 추후 구글로 변경.
-    @PostMapping("/naver")
+    // 추후 구글로 변경. 전체 disable 처리.
+/*    @PostMapping("/naver")
     public ResponseEntity<AuthTokens> loginNaver(@RequestBody NaverLoginParams params) {
         return ResponseEntity.ok(authService.login(params));
-    }
+    }*/
 
-    @PostMapping("/validate")
+/*    @PostMapping("/validate")
     public ResponseEntity<?> validate(@RequestHeader("Authorization") String requestAccessToken) {
         log.info("validate 확인 + requestAccessToken{}", requestAccessToken);
         log.info("--------- authService.validate(requestAccessToken): {}", authService.validate(requestAccessToken));
@@ -58,7 +88,7 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 재발급 필요
         }
-    }
+    }*/
 
     // 토큰 재발급
     @PostMapping("/reissue")

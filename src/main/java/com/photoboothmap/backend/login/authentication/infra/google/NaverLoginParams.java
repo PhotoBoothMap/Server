@@ -1,3 +1,4 @@
+/*
 package com.photoboothmap.backend.login.authentication.infra.google;
 
 import com.photoboothmap.backend.login.authentication.domain.oauth.OAuthLoginParams;
@@ -26,3 +27,4 @@ public class NaverLoginParams implements OAuthLoginParams {
         return body;
     }
 }
+*/
