@@ -104,10 +104,11 @@ JwtTokenProvider {
     }
 
     // 토큰 검증 로직
-    public boolean validateRefreshToken(String refreshToken) {
-        log.info("redisService.getValues(refreshToken): {}", redisService.getValues(refreshToken));
+    public boolean validateRefreshToken(String refreshToken, String keyInRedis) {
+
         try {
-            if (redisService.getValues(refreshToken).equals("delete")) { // 회원 탈퇴했을 경우
+            // getValues의 제대로 된 검증을 위해 refreshToken -> keyInRedis
+            if (redisService.getValues(keyInRedis).equals("delete")) { // 회원 탈퇴했을 경우
                 return false;
             }
             Jwts.parserBuilder()

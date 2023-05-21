@@ -73,33 +73,26 @@ public class AuthService {
     @Transactional
     public AuthTokens.TokenDto reissue(String requestAccessTokenInHeader, String requestRefreshToken) {
         String requestAccessToken = resolveToken(requestAccessTokenInHeader);
-        log.info("접근확인 1");
-        log.info("접근확인 requestRefreshToken:{}", requestRefreshToken);
+
         Authentication authentication = jwtTokenProvider.getAuthentication(requestAccessToken);
         String subject = jwtTokenProvider.getMemId(requestAccessToken);
 
-        log.info("--------------- id 확인: {}", subject);
         String principal = getPrincipal(requestAccessToken);
 
-        log.info("접근확인 2 principal: {}", principal);
         String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
+        String keyInRedis = ("RT(" + SERVER + "):" + principal);
         if (refreshTokenInRedis == null) { // Redis에 저장되어 있는 RT가 없을 경우
-            log.info("----------- redis 검색 실패: {}", redisService.getValues("RT(" + SERVER + "):" + principal));
             return null; // -> 재로그인 요청
         }
-        log.info("접근확인 3");
+
         // 요청된 RT의 유효성 검사 & Redis에 저장되어 있는 RT와 같은지 비교
-
-        if(!jwtTokenProvider.validateRefreshToken(requestRefreshToken) || !refreshTokenInRedis.equals(requestRefreshToken)) {
-
+        if(!jwtTokenProvider.validateRefreshToken(requestRefreshToken, keyInRedis) || !refreshTokenInRedis.equals(requestRefreshToken)) {
             redisService.deleteValues("RT(" + SERVER + "):" + principal); // 탈취 가능성 -> 삭제
             return null; // -> 재로그인 요청
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-//        String authorities = getAuthorities(authentication);
 
-        log.info("접근확인 4");
         // 토큰 재발급 및 Redis 업데이트
         redisService.deleteValues("RT(" + SERVER + "):" + principal); // 기존 RT 삭제
 //        AuthTokens.TokenDto tokenDto = AuthTokensGenerator.reissueGenerate(principal, authorities);

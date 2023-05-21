@@ -79,17 +79,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(params));
     }*/
 
-/*    @PostMapping("/validate")
-    public ResponseEntity<?> validate(@RequestHeader("Authorization") String requestAccessToken) {
-        log.info("validate 확인 + requestAccessToken{}", requestAccessToken);
-        log.info("--------- authService.validate(requestAccessToken): {}", authService.validate(requestAccessToken));
-        if (!authService.validate(requestAccessToken)) {
-            return ResponseEntity.status(HttpStatus.OK).build(); // 재발급 필요X
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 재발급 필요
-        }
-    }*/
-
     // 토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@CookieValue(name = "refresh-token") String requestRefreshToken,
@@ -100,9 +89,9 @@ public class AuthController {
         if (reissuedTokenDto != null) { // 토큰 재발급 성공
             // RT 저장
             ResponseCookie responseCookie = ResponseCookie.from("refresh-token", reissuedTokenDto.getRefreshToken())
-                    .maxAge(COOKIE_EXPIRATION)
+/*                    .maxAge(COOKIE_EXPIRATION)
                     .httpOnly(true)
-                    .secure(true)
+                    .secure(true)*/
                     .build();
             return ResponseEntity
                     .status(HttpStatus.OK)
