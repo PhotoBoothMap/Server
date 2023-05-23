@@ -79,4 +79,33 @@ public class BoothControllerTest {
 
     }
 
+    @Test
+    @DisplayName("[GET-OK] booth pin (empty)")
+    public void booth_pin_성공_빈리스트() throws Exception {
+
+        // given
+
+        // when
+        mvc.perform(get("/map?curx={v1}&cury={v2}&nex={v3}&ney={v4}",
+                        0, 0, 20, 20))
+
+                // then
+//                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(jsonPath("$.success").value("true"))
+                .andExpect(jsonPath("$.result.boothList").isArray())
+                .andExpect(jsonPath("$.result.boothList").isEmpty());
+
+        /* 예상 결과
+        {
+            "success": true,
+            "result": {
+                "boothList": []
+            }
+        }
+        */
+
+    }
+
 }
