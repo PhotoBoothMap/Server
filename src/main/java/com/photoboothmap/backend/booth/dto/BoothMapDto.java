@@ -1,10 +1,11 @@
 package com.photoboothmap.backend.booth.dto;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BoothMapDto {
 
     private Long boothIdx;
