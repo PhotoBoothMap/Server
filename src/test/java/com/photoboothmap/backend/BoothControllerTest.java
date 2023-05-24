@@ -264,4 +264,31 @@ public class BoothControllerTest {
 
     }
 
+    @Test
+    @DisplayName("[GET-OK] booth list (empty)")
+    public void booth_list_성공_빈리스트() throws Exception {
+        // given
+
+        // when
+        mvc.perform(get("/map/list?curx={v1}&cury={v2}&count={v3}",
+                        126.5709308145358, 33.452739313807456, 1750))
+
+        // then
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(jsonPath("$.success").value("true"))
+                .andExpect(jsonPath("$.result.boothList").isArray())
+                .andExpect(jsonPath("$.result.boothList").isEmpty());
+
+        /* 예상 결과
+        {
+            "success": true,
+            "result": {
+                "boothList": []
+            }
+        }
+        */
+
+    }
+
 }
