@@ -291,4 +291,46 @@ public class BoothControllerTest {
 
     }
 
+    @Test
+    @DisplayName("[GET-fail] booth list - wrong lat/lng range")
+    public void booth_list_실패_좌표범위() throws Exception {
+        // given
+
+        /**
+         * test 1: wrong latitude
+         * proper range : -90.0 ~ 90.0
+         */
+        // when
+        mvc.perform(get("/map/list?curx={v1}&cury={v2}&count={v3}",
+                        126, 133, 1))
+
+        // then
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(status().is(453))
+                .andExpect(jsonPath("$.success").value("false"))
+                .andExpect(jsonPath("$.message").value("wrong latitude/longitude range"));
+
+        /**
+         * test 2: wrong longitude
+         * proper range : -180.0 ~ 180.0
+         */
+        // when
+        mvc.perform(get("/map/list?curx={v1}&cury={v2}&count={v3}",
+                        1126, 33, 1))
+
+        // then
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(status().is(453))
+                .andExpect(jsonPath("$.success").value("false"))
+                .andExpect(jsonPath("$.message").value("wrong latitude/longitude range"));
+
+        /* 예상 결과
+        {
+            "success": false,
+            "message": "wrong latitude/longitude range"
+        }
+        */
+
+    }
+
 }
