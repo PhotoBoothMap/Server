@@ -6,6 +6,8 @@ import com.photoboothmap.backend.booth.entity.BoothEntity;
 import com.photoboothmap.backend.booth.repository.BoothRepository;
 import com.photoboothmap.backend.brand.repository.BrandRepository;
 import com.photoboothmap.backend.review.repository.ReviewRepository;
+import com.photoboothmap.backend.util.config.BaseException;
+import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,27 +45,31 @@ public class BoothService {
         return boothMap;
     }
 
-    public Map<String, Object> getBoothList(Double curx, Double cury, int count) {
-        List<Tuple> boothList = boothRepository.findBoothList(curx, cury, count);
+    public Map<String, Object> getBoothList(Double curx, Double cury, int count) throws BaseException {
+        try {
+            List<Tuple> boothList = boothRepository.findBoothList(curx, cury, count);
 
-        List<BoothListDto> list = boothList.stream()
-                .map(b -> BoothListDto.builder()
-                        .boothIdx(b.get("id", BigInteger.class).longValue())
-                        .brand(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName())
-                        .name(b.get("name", String.class))
-                        .address(b.get("address", String.class))
-                        .distance((int) Math.round(b.get("distance", Double.class)))
-                        .score(reviewRepository.averageStarRateByBoothIdx(b.get("id", BigInteger.class).longValue()))
-                        .reviewNum(reviewRepository.countByPhotoBooth_Id(b.get("id", BigInteger.class).longValue()))
-                        .latitude(b.get("latitude", Double.class))
-                        .longitude(b.get("longitude", Double.class))
-                        .build()
-                ).collect(Collectors.toList());
+            List<BoothListDto> list = boothList.stream()
+                    .map(b -> BoothListDto.builder()
+                            .boothIdx(b.get("id", BigInteger.class).longValue())
+                            .brand(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName())
+                            .name(b.get("name", String.class))
+                            .address(b.get("address", String.class))
+                            .distance((int) Math.round(b.get("distance", Double.class)))
+                            .score(reviewRepository.averageStarRateByBoothIdx(b.get("id", BigInteger.class).longValue()))
+                            .reviewNum(reviewRepository.countByPhotoBooth_Id(b.get("id", BigInteger.class).longValue()))
+                            .latitude(b.get("latitude", Double.class))
+                            .longitude(b.get("longitude", Double.class))
+                            .build()
+                    ).collect(Collectors.toList());
 
-        Map<String, Object> boothMap = new HashMap<>() {{
-            put("boothList", list);
-        }};
+            Map<String, Object> boothMap = new HashMap<>() {{
+                put("boothList", list);
+            }};
+            return boothMap;
 
-        return boothMap;
+        } catch (Exception e) {
+            throw new BaseException(ResponseStatus.WRONG_LATLNG_RANGE);
+        }
     }
 }

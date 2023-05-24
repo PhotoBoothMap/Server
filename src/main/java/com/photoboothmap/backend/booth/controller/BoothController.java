@@ -1,6 +1,7 @@
 package com.photoboothmap.backend.booth.controller;
 
 import com.photoboothmap.backend.booth.service.BoothService;
+import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +34,12 @@ public class BoothController {
             @RequestParam int count) {
         System.out.println("curx(lng) = " + curx);
         System.out.println("cury(lat) = " + cury);
-        Map<String, Object> boothList = boothService.getBoothList(curx, cury, count);
-        return new BaseResponse<>(boothList).convert();
+        try {
+            Map<String, Object> boothList = boothService.getBoothList(curx, cury, count);
+            return new BaseResponse<>(boothList).convert();
+        } catch (BaseException ex) {
+            return new BaseResponse<>(ex.getStatus()).convert();
+        }
     }
 
 }
