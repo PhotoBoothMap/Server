@@ -1,11 +1,11 @@
 package com.photoboothmap.backend.login.authentication.application;
 
-import com.photoboothmap.backend.home.TestDto;
 import com.photoboothmap.backend.login.authentication.domain.AuthTokens;
 //import com.photoboothmap.backend.login.authentication.infra.google.NaverLoginParams;
 import com.photoboothmap.backend.login.authentication.infra.kakao.KakaoLoginParams;
 import com.photoboothmap.backend.login.authentication.service.AuthService;
 import com.photoboothmap.backend.login.common.dto.LoginDto;
+import com.photoboothmap.backend.login.common.dto.SuccessDto;
 import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
 import com.photoboothmap.backend.util.config.BaseResponse;
@@ -14,11 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -32,7 +28,7 @@ public class AuthController {
     private final long COOKIE_EXPIRATION = 7776000; // 90일
 
     @PostMapping("/kakao")
-    public ResponseEntity<LoginDto> loginKakao(@RequestBody KakaoLoginParams params) {
+    public ResponseEntity<BaseResponse<LoginDto>> loginKakao(@RequestBody KakaoLoginParams params) {
         // User 등록 및 Refresh Token 저장, 닉네임 가져오는 로직 추가.
         Map<String, AuthTokens> maps = authService.login(params);
 
@@ -64,7 +60,7 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, httpCookie.toString())
                 // AT 저장
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokens.getAccessToken())
-                .body(loginDto);
+                .body(new BaseResponse<>(loginDto));
 //                .build();
     }
 
@@ -86,6 +82,7 @@ public class AuthController {
         log.info("requestAccessToken: {} | requestRefreshToken: {}", requestAccessToken, requestRefreshToken);
         AuthTokens.TokenDto reissuedTokenDto = authService.reissue(requestAccessToken, requestRefreshToken);
 
+        SuccessDto successDto;
         if (reissuedTokenDto != null) { // 토큰 재발급 성공
             // RT 저장
             ResponseCookie responseCookie = ResponseCookie.from("refresh-token", reissuedTokenDto.getRefreshToken())
@@ -93,12 +90,15 @@ public class AuthController {
                     .httpOnly(true)
                     .secure(true)*/
                     .build();
+            // success true
+            successDto = SuccessDto.builder().success(true).build();
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                     // AT 저장
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + reissuedTokenDto.getAccessToken())
-                    .build();
+                    .body(successDto);
+//                    .build();
 
         } else { // Refresh Token 탈취 가능성
             // Cookie 삭제 후 재로그인 유도
@@ -106,10 +106,13 @@ public class AuthController {
                     .maxAge(0)
                     .path("/")
                     .build();
+            // success false
+            successDto = SuccessDto.builder().success(false).build();
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                    .build();
+                    .body(successDto);
+//                    .build();
         }
     }
 
