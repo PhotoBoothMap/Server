@@ -25,7 +25,9 @@ public class AuthController {
     private final AuthService authService;
     private final MemberRepository memberRepository;
 
-    private final long COOKIE_EXPIRATION = 7776000; // 90일
+    // cookie period: 현재 헤더에서 나타나지 X
+/*    @Value("${jwt.cookie-period}")
+    private final long COOKIE_EXPIRATION;*/
 
     @PostMapping("/kakao")
     public ResponseEntity<BaseResponse<LoginDto>> loginKakao(@RequestBody KakaoLoginParams params) {
@@ -63,11 +65,6 @@ public class AuthController {
                 .body(new BaseResponse<>(loginDto));
 //                .build();
     }
-
-    // 원래 코드: body에 저장 -> header에 저장하는 것으로 변경.
-/*    public ResponseEntity<AuthTokens> loginKakao(@RequestBody KakaoLoginParams params) {
-        return ResponseEntity.ok(oAuthLoginService.login(params));
-    }*/
 
     // 추후 구글로 변경. 전체 disable 처리.
 /*    @PostMapping("/naver")
