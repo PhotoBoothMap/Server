@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 @Getter
@@ -35,7 +37,10 @@ public class BaseResponse<T> {
 
 
     public ResponseEntity<BaseResponse> convert() {
-        return ResponseEntity.status(this.code).body(this);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json; charset=UTF-8");
+
+        return ResponseEntity.status(this.code).headers(headers).body(this);
     }
 }
 
