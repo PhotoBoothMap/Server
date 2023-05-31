@@ -32,11 +32,12 @@ public class BoothController {
     public ResponseEntity<BaseResponse> getBoothList(
             @RequestParam Double curx,
             @RequestParam Double cury,
-            @RequestParam int count) {
+            @RequestParam int count,
+            @RequestParam String filter) {
         System.out.println("curx(lng) = " + curx);
         System.out.println("cury(lat) = " + cury);
         try {
-            Map<String, Object> boothList = boothService.getBoothList(curx, cury, count);
+            Map<String, Object> boothList = boothService.getBoothList(curx, cury, count, filter);
             return new BaseResponse<>(boothList).convert();
         } catch (BaseException ex) {
             return new BaseResponse<>(ex.getStatus()).convert();

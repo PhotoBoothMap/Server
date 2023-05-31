@@ -58,11 +58,25 @@ public class BoothService {
         return boothMap;
     }
 
-    public Map<String, Object> getBoothList(Double curx, Double cury, int count) throws BaseException {
+    public Map<String, Object> getBoothList(Double curx, Double cury, int count, String filter) throws BaseException {
         try {
             List<Tuple> boothList = boothRepository.findBoothList(curx, cury, count);
 
+            List<String> filterList = List.of(filter.split(","));
+
+            Predicate<Tuple> filterMethod = null;
+            if (filterList.contains("기타")) {
+                // 제외하는 방향으로
+                List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
+                rep.removeAll(filterList);
+                filterMethod = b -> !rep.contains(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName());
+            } else {
+                // 포함하는 방향으로
+                filterMethod = b -> filterList.contains(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName());
+            }
+
             List<BoothListDto> list = boothList.stream()
+                    .filter(filterMethod)
                     .map(b -> BoothListDto.builder()
                             .boothIdx(b.get("id", BigInteger.class).longValue())
                             .brand(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName())
