@@ -13,9 +13,8 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.Tuple;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,10 +25,24 @@ public class BoothService {
     private final BrandRepository brandRepository;
     private final ReviewRepository reviewRepository;
 
-    public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney) {
+    public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) {
         List<BoothEntity> entityList = boothRepository.findBoothMap(curx, cury, nex-curx, ney-cury);
 
+        List<String> filterList = List.of(filter.split(","));
+
+        Predicate<BoothEntity> filterMethod = null;
+        if (filterList.contains("기타")) {
+            // 제외하는 방향으로
+            List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
+            rep.removeAll(filterList);
+            filterMethod = b -> !rep.contains(b.getBrand().getName());
+        } else {
+            // 포함하는 방향으로
+            filterMethod = b -> filterList.contains(b.getBrand().getName());
+        }
+
         List<BoothMapDto> list = entityList.stream()
+                .filter(filterMethod)
                 .map(b -> BoothMapDto.builder()
                         .boothIdx(b.getId())
                         .brand(b.getBrand().getName())

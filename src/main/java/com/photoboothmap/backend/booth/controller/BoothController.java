@@ -21,8 +21,9 @@ public class BoothController {
             @RequestParam Double curx,
             @RequestParam Double cury,
             @RequestParam Double nex,
-            @RequestParam Double ney) {
-        Map<String, Object> boothList = boothService.getBoothMap(curx, cury, nex, ney);
+            @RequestParam Double ney,
+            @RequestParam String filter) {
+        Map<String, Object> boothList = boothService.getBoothMap(curx, cury, nex, ney, filter);
         return new BaseResponse<>(boothList).convert();
     }
 
