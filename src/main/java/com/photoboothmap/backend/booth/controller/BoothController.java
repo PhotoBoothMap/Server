@@ -34,8 +34,6 @@ public class BoothController {
             @RequestParam Double cury,
             @RequestParam int count,
             @RequestParam String filter) {
-        System.out.println("curx(lng) = " + curx);
-        System.out.println("cury(lat) = " + cury);
         try {
             Map<String, Object> boothList = boothService.getBoothList(curx, cury, count, filter);
             return new BaseResponse<>(boothList).convert();
