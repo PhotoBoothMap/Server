@@ -13,20 +13,49 @@ import java.util.List;
 public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
     @Query(value = "select * from photo_booth b where " +
             "b.longitude between (:lng-:width) and (:lng+:width) and " +
-            "b.latitude between (:lat-:height) and (:lat+:height)"
+            "b.latitude between (:lat-:height) and (:lat+:height) and " +
+            "brand in :includeList"
             , nativeQuery = true)
-    List<BoothEntity> findBoothMap(
+    List<BoothEntity> findBoothMapIn(
             @Param("lng") Double curx,
             @Param("lat") Double cury,
             @Param("width") Double width,
-            @Param("height") Double height);
+            @Param("height") Double height,
+            @Param("includeList") List<Long> includeList);
 
-    @Query(value = "select *, ST_Distance_Sphere(point(:lng, :lat), point(longitude, latitude)) as distance from photo_booth b " +
+    @Query(value = "select * from photo_booth b where " +
+            "b.longitude between (:lng-:width) and (:lng+:width) and " +
+            "b.latitude between (:lat-:height) and (:lat+:height) and " +
+            "brand not in :excludeList"
+            , nativeQuery = true)
+    List<BoothEntity> findBoothMapNotIn(
+            @Param("lng") Double curx,
+            @Param("lat") Double cury,
+            @Param("width") Double width,
+            @Param("height") Double height,
+            @Param("excludeList") List<Long> excludeList);
+
+    @Query(value = "select *, ST_Distance_Sphere(point(:lng, :lat), point(longitude, latitude)) as distance " +
+            "from photo_booth b " +
+            "where brand in :includeList " +
             "order by distance " +
             "limit :offset, 10"
             , nativeQuery = true)
-    List<Tuple> findBoothList(
+    List<Tuple> findBoothListIn(
             @Param("lng") Double curx,
             @Param("lat") Double cury,
-            @Param("offset") int offset);
+            @Param("offset") int offset,
+            @Param("includeList") List<Long> includeList);
+
+    @Query(value = "select *, ST_Distance_Sphere(point(:lng, :lat), point(longitude, latitude)) as distance " +
+            "from photo_booth b " +
+            "where brand not in :includeList " +
+            "order by distance " +
+            "limit :offset, 10"
+            , nativeQuery = true)
+    List<Tuple> findBoothListNotIn(
+            @Param("lng") Double curx,
+            @Param("lat") Double cury,
+            @Param("offset") int offset,
+            @Param("includeList") List<Long> includeList);
 }

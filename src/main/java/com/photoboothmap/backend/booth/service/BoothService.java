@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import javax.persistence.Tuple;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,23 +25,20 @@ public class BoothService {
     private final ReviewRepository reviewRepository;
 
     public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) {
-        List<BoothEntity> entityList = boothRepository.findBoothMap(curx, cury, nex-curx, ney-cury);
-
         List<String> filterList = List.of(filter.split(","));
 
-        Predicate<BoothEntity> filterMethod = null;
+        List<BoothEntity> boothList = null;
         if (filterList.contains("기타")) {
             // 제외하는 방향으로
             List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
             rep.removeAll(filterList);
-            filterMethod = b -> !rep.contains(b.getBrand().getName());
+            boothList = boothRepository.findBoothMapNotIn(curx, cury, nex-curx, ney-cury, getBrandIds(rep));
         } else {
             // 포함하는 방향으로
-            filterMethod = b -> filterList.contains(b.getBrand().getName());
+            boothList = boothRepository.findBoothMapIn(curx, cury, nex-curx, ney-cury, getBrandIds(filterList));
         }
 
-        List<BoothMapDto> list = entityList.stream()
-                .filter(filterMethod)
+        List<BoothMapDto> list = boothList.stream()
                 .map(b -> BoothMapDto.builder()
                         .boothIdx(b.getId())
                         .brand(b.getBrand().getName())
@@ -60,23 +56,20 @@ public class BoothService {
 
     public Map<String, Object> getBoothList(Double curx, Double cury, int count, String filter) throws BaseException {
         try {
-            List<Tuple> boothList = boothRepository.findBoothList(curx, cury, count);
-
             List<String> filterList = List.of(filter.split(","));
 
-            Predicate<Tuple> filterMethod = null;
+            List<Tuple> boothList = null;
             if (filterList.contains("기타")) {
                 // 제외하는 방향으로
                 List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
                 rep.removeAll(filterList);
-                filterMethod = b -> !rep.contains(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName());
+                boothList = boothRepository.findBoothListNotIn(curx, cury, count, getBrandIds(rep));
             } else {
                 // 포함하는 방향으로
-                filterMethod = b -> filterList.contains(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName());
+                boothList = boothRepository.findBoothListIn(curx, cury, count, getBrandIds(filterList));
             }
 
             List<BoothListDto> list = boothList.stream()
-                    .filter(filterMethod)
                     .map(b -> BoothListDto.builder()
                             .boothIdx(b.get("id", BigInteger.class).longValue())
                             .brand(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName())
@@ -98,5 +91,11 @@ public class BoothService {
         } catch (Exception e) {
             throw new BaseException(ResponseStatus.WRONG_LATLNG_RANGE);
         }
+    }
+
+    public List<Long> getBrandIds(List<String> brandList) {
+        return brandList.stream()
+                .map(b -> brandRepository.getBrandEntityByName(b).getId())
+                .collect(Collectors.toList());
     }
 }
