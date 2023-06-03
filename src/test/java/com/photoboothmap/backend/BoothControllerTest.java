@@ -294,6 +294,34 @@ public class BoothControllerTest {
 
     }
 
+    @Test
+    @DisplayName("[GET-OK] booth pin (no filter)")
+    public void booth_pin_성공_빈필터() throws Exception {
+
+        // given
+
+        // when
+        mvc.perform(get(mapUrl,
+                        126.5709308145358, 33.452739313807456, 126.5809308145358, 33.552739313807456, ""))
+
+        // then
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(jsonPath("$.success").value("true"))
+                .andExpect(jsonPath("$.result.boothList").isArray())
+                .andExpect(jsonPath("$.result.boothList").isEmpty());
+
+        /* 예상 결과
+        {
+            "success": true,
+            "result": {
+                "boothList": []
+            }
+        }
+        */
+
+    }
+
     /* /map test end --------------------------------------------------------------------------------------------------------------------------------------- */
 
     /* /map/list test start -------------------------------------------------------------------------------------------------------------------------------- */
@@ -692,6 +720,34 @@ public class BoothControllerTest {
                         126.5709308145358, 33.452739313807456, 1750, allBrand))
 
         // then
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(jsonPath("$.success").value("true"))
+                .andExpect(jsonPath("$.result.boothList").isArray())
+                .andExpect(jsonPath("$.result.boothList").isEmpty());
+
+        /* 예상 결과
+        {
+            "success": true,
+            "result": {
+                "boothList": []
+            }
+        }
+        */
+
+    }
+
+    @Test
+    @DisplayName("[GET-OK] booth list (no filter)")
+    public void booth_list_성공_빈필터() throws Exception {
+
+        // given
+
+        // when
+        mvc.perform(get(mapListUrl,
+                        126.5709308145358, 33.452739313807456, 0, ""))
+
+                // then
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=utf8"))
                 .andExpect(jsonPath("$.success").value("true"))
