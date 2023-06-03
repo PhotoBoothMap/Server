@@ -23,8 +23,12 @@ public class BoothController {
             @RequestParam Double nex,
             @RequestParam Double ney,
             @RequestParam String filter) {
-        Map<String, Object> boothList = boothService.getBoothMap(curx, cury, nex, ney, filter);
-        return new BaseResponse<>(boothList).convert();
+        try {
+            Map<String, Object> boothList = boothService.getBoothMap(curx, cury, nex, ney, filter);
+            return new BaseResponse<>(boothList).convert();
+        } catch (BaseException ex) {
+            return new BaseResponse<>(ex.getStatus()).convert();
+        }
     }
 
     @ResponseBody

@@ -24,34 +24,39 @@ public class BoothService {
     private final BrandRepository brandRepository;
     private final ReviewRepository reviewRepository;
 
-    public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) {
-        List<String> filterList = List.of(filter.split(","));
+    public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) throws BaseException {
+        try {
+            List<String> filterList = List.of(filter.split(","));
 
-        List<BoothEntity> boothList = null;
-        if (filterList.contains("기타")) {
-            // 제외하는 방향으로
-            List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
-            rep.removeAll(filterList);
-            boothList = boothRepository.findBoothMapNotIn(curx, cury, nex-curx, ney-cury, getBrandIds(rep));
-        } else {
-            // 포함하는 방향으로
-            boothList = boothRepository.findBoothMapIn(curx, cury, nex-curx, ney-cury, getBrandIds(filterList));
+            List<BoothEntity> boothList = null;
+            if (filterList.contains("기타")) {
+                // 제외하는 방향으로
+                List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
+                rep.removeAll(filterList);
+                boothList = boothRepository.findBoothMapNotIn(curx, cury, nex-curx, ney-cury, getBrandIds(rep));
+            } else {
+                // 포함하는 방향으로
+                boothList = boothRepository.findBoothMapIn(curx, cury, nex-curx, ney-cury, getBrandIds(filterList));
+            }
+
+            List<BoothMapDto> list = boothList.stream()
+                    .map(b -> BoothMapDto.builder()
+                            .boothIdx(b.getId())
+                            .brand(b.getBrand().getName())
+                            .latitude(b.getLatitude())
+                            .longitude(b.getLongitude())
+                            .build())
+                    .collect(Collectors.toList());
+
+            Map<String, Object> boothMap = new HashMap<>() {{
+                put("boothList", list);
+            }};
+
+            return boothMap;
+
+        } catch (NullPointerException e) {
+            throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         }
-
-        List<BoothMapDto> list = boothList.stream()
-                .map(b -> BoothMapDto.builder()
-                        .boothIdx(b.getId())
-                        .brand(b.getBrand().getName())
-                        .latitude(b.getLatitude())
-                        .longitude(b.getLongitude())
-                        .build())
-                .collect(Collectors.toList());
-
-        Map<String, Object> boothMap = new HashMap<>() {{
-            put("boothList", list);
-        }};
-
-        return boothMap;
     }
 
     public Map<String, Object> getBoothList(Double curx, Double cury, int count, String filter) throws BaseException {
@@ -88,12 +93,14 @@ public class BoothService {
             }};
             return boothMap;
 
+        } catch (NullPointerException e) {
+            throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         } catch (Exception e) {
             throw new BaseException(ResponseStatus.WRONG_LATLNG_RANGE);
         }
     }
 
-    public List<Long> getBrandIds(List<String> brandList) {
+    public List<Long> getBrandIds(List<String> brandList) throws NullPointerException {
         return brandList.stream()
                 .map(b -> brandRepository.getBrandEntityByName(b).getId())
                 .collect(Collectors.toList());
