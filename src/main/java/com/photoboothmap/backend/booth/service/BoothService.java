@@ -9,6 +9,7 @@ import com.photoboothmap.backend.review.repository.ReviewRepository;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.Tuple;
@@ -95,7 +96,7 @@ public class BoothService {
 
         } catch (NullPointerException e) {
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
-        } catch (Exception e) {
+        } catch (DataIntegrityViolationException e) {
             throw new BaseException(ResponseStatus.WRONG_LATLNG_RANGE);
         }
     }
