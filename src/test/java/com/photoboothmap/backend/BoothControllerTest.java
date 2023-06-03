@@ -30,7 +30,9 @@ public class BoothControllerTest {
     String etcBrand = "인생네컷,포토시그니처,기타";
     String noEtcBrand = "포토이즘,하루필름,셀픽스";
 
+    String wrongBrand = "인생세컷,기타";
     ResponseStatus rangeError = ResponseStatus.WRONG_LATLNG_RANGE;
+    ResponseStatus nameError = ResponseStatus.WRONG_BRAND_NAME;
 
     @BeforeEach
     public void setup() {
@@ -320,6 +322,31 @@ public class BoothControllerTest {
             "result": {
                 "boothList": []
             }
+        }
+        */
+
+    }
+
+    @Test
+    @DisplayName("[GET-fail] booth pin - wrong brand name")
+    public void booth_map_실패_브랜드명() throws Exception {
+
+        // given
+
+        // when
+        mvc.perform(get(mapUrl,
+                        126.5709308145358, 33.452739313807456, 126.5809308145358, 33.552739313807456, wrongBrand))
+
+        // then
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(status().is(nameError.getCode()))
+                .andExpect(jsonPath("$.success").value(nameError.isSuccess()))
+                .andExpect(jsonPath("$.message").value(nameError.getMessage()));
+
+        /* 예상 결과
+        {
+            "success": false,
+            "message": "wrong latitude/longitude range"
         }
         */
 
@@ -800,6 +827,30 @@ public class BoothControllerTest {
                 .andExpect(status().is(rangeError.getCode()))
                 .andExpect(jsonPath("$.success").value(rangeError.isSuccess()))
                 .andExpect(jsonPath("$.message").value(rangeError.getMessage()));
+
+        /* 예상 결과
+        {
+            "success": false,
+            "message": "wrong latitude/longitude range"
+        }
+        */
+
+    }
+
+    @Test
+    @DisplayName("[GET-fail] booth list - wrong brand name")
+    public void booth_list_실패_브랜드명() throws Exception {
+        // given
+
+        // when
+        mvc.perform(get(mapListUrl,
+                        126, 33, 1, wrongBrand))
+
+        // then
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(status().is(nameError.getCode()))
+                .andExpect(jsonPath("$.success").value(nameError.isSuccess()))
+                .andExpect(jsonPath("$.message").value(nameError.getMessage()));
 
         /* 예상 결과
         {
