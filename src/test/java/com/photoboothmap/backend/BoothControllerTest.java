@@ -1,5 +1,6 @@
 package com.photoboothmap.backend;
 
+import com.photoboothmap.backend.util.config.ResponseStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +29,8 @@ public class BoothControllerTest {
     String allBrand = "포토이즘,하루필름,포토시그니처,인생네컷,셀픽스,기타";
     String etcBrand = "인생네컷,포토시그니처,기타";
     String noEtcBrand = "포토이즘,하루필름,셀픽스";
+
+    ResponseStatus rangeError = ResponseStatus.WRONG_LATLNG_RANGE;
 
     @BeforeEach
     public void setup() {
@@ -780,9 +783,9 @@ public class BoothControllerTest {
 
         // then
                 .andExpect(content().contentType("application/json;charset=utf8"))
-                .andExpect(status().is(453))
-                .andExpect(jsonPath("$.success").value("false"))
-                .andExpect(jsonPath("$.message").value("wrong latitude/longitude range"));
+                .andExpect(status().is(rangeError.getCode()))
+                .andExpect(jsonPath("$.success").value(rangeError.isSuccess()))
+                .andExpect(jsonPath("$.message").value(rangeError.getMessage()));
 
         /**
          * test 2: wrong longitude
@@ -794,9 +797,9 @@ public class BoothControllerTest {
 
         // then
                 .andExpect(content().contentType("application/json;charset=utf8"))
-                .andExpect(status().is(453))
-                .andExpect(jsonPath("$.success").value("false"))
-                .andExpect(jsonPath("$.message").value("wrong latitude/longitude range"));
+                .andExpect(status().is(rangeError.getCode()))
+                .andExpect(jsonPath("$.success").value(rangeError.isSuccess()))
+                .andExpect(jsonPath("$.message").value(rangeError.getMessage()));
 
         /* 예상 결과
         {
