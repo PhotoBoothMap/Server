@@ -26,7 +26,7 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
     @Query(value = "select * from photo_booth b where " +
             "b.longitude between (:lng-:width) and (:lng+:width) and " +
             "b.latitude between (:lat-:height) and (:lat+:height) and " +
-            "brand not in :excludeList"
+            "(COALESCE(:excludeList, 0) = 0 or brand not in :excludeList)"
             , nativeQuery = true)
     List<BoothEntity> findBoothMapNotIn(
             @Param("lng") Double curx,
@@ -49,7 +49,7 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
 
     @Query(value = "select *, ST_Distance_Sphere(point(:lng, :lat), point(longitude, latitude)) as distance " +
             "from photo_booth b " +
-            "where brand not in :includeList " +
+            "where COALESCE(:excludeList, 0) = 0 or brand not in :excludeList "+
             "order by distance " +
             "limit :offset, 10"
             , nativeQuery = true)
@@ -57,5 +57,5 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             @Param("lng") Double curx,
             @Param("lat") Double cury,
             @Param("offset") int offset,
-            @Param("includeList") List<Long> includeList);
+            @Param("excludeList") List<Long> excludeList);
 }

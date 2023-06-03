@@ -24,18 +24,19 @@ public class BoothService {
     private final BoothRepository boothRepository;
     private final BrandRepository brandRepository;
     private final ReviewRepository reviewRepository;
+    private final String basicBrand = "포토이즘,하루필름,포토시그니처,인생네컷,셀픽스";
 
     public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) throws BaseException {
         try {
             List<String> filterList = List.of(filter.split(","));
 
-            List<BoothEntity> boothList = null;
+            List<BoothEntity> boothList = new ArrayList<>();
             if (filterList.contains("기타")) {
                 // 제외하는 방향으로
-                List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
-                rep.removeAll(filterList);
-                boothList = boothRepository.findBoothMapNotIn(curx, cury, nex-curx, ney-cury, getBrandIds(rep));
-            } else {
+                List<Long> basicList = getBrandIds(List.of(basicBrand.split(",")));
+                basicList.removeAll(getBrandIds(filterList));
+                boothList = boothRepository.findBoothMapNotIn(curx, cury, nex-curx, ney-cury, basicList);
+            } else if (!filter.isBlank()) {
                 // 포함하는 방향으로
                 boothList = boothRepository.findBoothMapIn(curx, cury, nex-curx, ney-cury, getBrandIds(filterList));
             }
@@ -64,13 +65,13 @@ public class BoothService {
         try {
             List<String> filterList = List.of(filter.split(","));
 
-            List<Tuple> boothList = null;
+            List<Tuple> boothList = new ArrayList<>();
             if (filterList.contains("기타")) {
                 // 제외하는 방향으로
-                List<String> rep = new ArrayList<>(Arrays.asList("포토이즘", "하루필름", "포토시그니처", "인생네컷", "셀픽스"));
-                rep.removeAll(filterList);
-                boothList = boothRepository.findBoothListNotIn(curx, cury, count, getBrandIds(rep));
-            } else {
+                List<Long> basicList = getBrandIds(List.of(basicBrand.split(",")));
+                basicList.removeAll(getBrandIds(filterList));
+                boothList = boothRepository.findBoothListNotIn(curx, cury, count, basicList);
+            } else if (!filter.isBlank()) {
                 // 포함하는 방향으로
                 boothList = boothRepository.findBoothListIn(curx, cury, count, getBrandIds(filterList));
             }
