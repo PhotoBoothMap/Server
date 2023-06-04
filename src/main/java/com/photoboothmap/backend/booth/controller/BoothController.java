@@ -21,9 +21,14 @@ public class BoothController {
             @RequestParam Double curx,
             @RequestParam Double cury,
             @RequestParam Double nex,
-            @RequestParam Double ney) {
-        Map<String, Object> boothList = boothService.getBoothMap(curx, cury, nex, ney);
-        return new BaseResponse<>(boothList).convert();
+            @RequestParam Double ney,
+            @RequestParam String filter) {
+        try {
+            Map<String, Object> boothList = boothService.getBoothMap(curx, cury, nex, ney, filter);
+            return new BaseResponse<>(boothList).convert();
+        } catch (BaseException ex) {
+            return new BaseResponse<>(ex.getStatus()).convert();
+        }
     }
 
     @ResponseBody
@@ -31,11 +36,10 @@ public class BoothController {
     public ResponseEntity<BaseResponse> getBoothList(
             @RequestParam Double curx,
             @RequestParam Double cury,
-            @RequestParam int count) {
-        System.out.println("curx(lng) = " + curx);
-        System.out.println("cury(lat) = " + cury);
+            @RequestParam int count,
+            @RequestParam String filter) {
         try {
-            Map<String, Object> boothList = boothService.getBoothList(curx, cury, count);
+            Map<String, Object> boothList = boothService.getBoothList(curx, cury, count, filter);
             return new BaseResponse<>(boothList).convert();
         } catch (BaseException ex) {
             return new BaseResponse<>(ex.getStatus()).convert();
