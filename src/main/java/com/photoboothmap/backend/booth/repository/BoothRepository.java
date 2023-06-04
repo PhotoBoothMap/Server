@@ -58,4 +58,15 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             @Param("lat") Double cury,
             @Param("offset") int offset,
             @Param("excludeList") List<Long> excludeList);
+
+    @Query(value = "select * " +
+            "from photo_booth b " +
+            "where name like CONCAT('%', :keyword, '%') and " +
+            "IF(:include, brand IN (:list)," +
+            "(COALESCE(:list, 0) = 0 OR brand NOT IN (:list)))"
+            , nativeQuery = true)
+    List<BoothEntity> findBoothSearch(
+            @Param("keyword") String keyword,
+            @Param("list") List<Long> list,
+            @Param("include") Boolean include);
 }

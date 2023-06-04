@@ -102,6 +102,43 @@ public class BoothService {
         }
     }
 
+    public Map<String, Object> getBoothSearch(String keyword, String filter) throws BaseException {
+        try {
+            List<String> filterList = List.of(filter.split(","));
+
+            List<Long> filterNum = new ArrayList<>();
+            Boolean include = true;
+            if (filterList.contains("기타")) {
+                // 제외하는 방향으로
+                filterNum = getBrandIds(List.of(basicBrand.split(",")));
+                filterNum.removeAll(getBrandIds(filterList));
+                include = false;
+            } else if (!filter.isBlank()) {
+                // 포함하는 방향으로
+                filterNum = getBrandIds(filterList);
+            }
+
+            List<BoothEntity> boothList = boothRepository.findBoothSearch(keyword, filterNum, include);
+
+            List<BoothMapDto> list = boothList.stream()
+                    .map(b -> BoothMapDto.builder()
+                            .boothIdx(b.getId())
+                            .brand(b.getBrand().getName())
+                            .latitude(b.getLatitude())
+                            .longitude(b.getLongitude())
+                            .build())
+                    .collect(Collectors.toList());
+
+            Map<String, Object> boothMap = new HashMap<>() {{
+                put("boothList", list);
+            }};
+            return boothMap;
+
+        } catch (NullPointerException e) {
+            throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
+        }
+    }
+
     public List<Long> getBrandIds(List<String> brandList) throws NullPointerException {
         return brandList.stream()
                 .map(b -> brandRepository.getBrandEntityByName(b).getId())
