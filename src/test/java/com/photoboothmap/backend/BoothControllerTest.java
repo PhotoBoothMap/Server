@@ -33,6 +33,7 @@ public class BoothControllerTest {
     String wrongBrand = "인생세컷,기타";
     ResponseStatus rangeError = ResponseStatus.WRONG_LATLNG_RANGE;
     ResponseStatus nameError = ResponseStatus.WRONG_BRAND_NAME;
+    ResponseStatus keywordError = ResponseStatus.EMPTY_KEYWORD;
 
     @BeforeEach
     public void setup() {
@@ -960,6 +961,30 @@ public class BoothControllerTest {
             "result": {
                 "boothList": []
             }
+        }
+        */
+
+    }
+
+    @Test
+    @DisplayName("[GET-fail] booth search - empty keyword")
+    public void booth_search_실패_빈검색어() throws Exception {
+        // given
+
+        // when
+        mvc.perform(get(mapSearchUrl,
+                        " ", allBrand))
+
+        // then
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(status().is(keywordError.getCode()))
+                .andExpect(jsonPath("$.success").value(keywordError.isSuccess()))
+                .andExpect(jsonPath("$.message").value(keywordError.getMessage()));
+
+        /* 예상 결과
+        {
+            "success": false,
+            "message": "empty keyword"
         }
         */
 
