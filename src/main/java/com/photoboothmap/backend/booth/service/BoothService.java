@@ -104,6 +104,10 @@ public class BoothService {
 
     public Map<String, Object> getBoothSearch(String keyword, String filter) throws BaseException {
         try {
+            if (keyword.isBlank()) {
+                throw new BaseException(ResponseStatus.EMPTY_KEYWORD);
+            }
+
             List<String> filterList = List.of(filter.split(","));
 
             List<Long> filterNum = new ArrayList<>();
@@ -136,6 +140,8 @@ public class BoothService {
 
         } catch (NullPointerException e) {
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
+        } catch (BaseException e) {
+            throw new BaseException(e.getStatus());
         }
     }
 

@@ -11,6 +11,7 @@ public enum ResponseStatus {
     TEST_STATUS( false, 452, "Custom message example"),
     WRONG_LATLNG_RANGE(false, 453, "wrong latitude/longitude range"),
     WRONG_BRAND_NAME(false, 453, "wrong brand name"),
+    EMPTY_KEYWORD(false, 453, "empty keyword"),
 
 
     // 아래는 false로 들어가는 기본 HttpStatus, deprecated 제외
