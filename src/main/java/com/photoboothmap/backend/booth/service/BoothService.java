@@ -28,17 +28,13 @@ public class BoothService {
 
     public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) throws BaseException {
         try {
-            List<String> filterList = List.of(filter.split(","));
-
             List<BoothEntity> boothList = new ArrayList<>();
-            if (filterList.contains("기타")) {
-                // 제외하는 방향으로
-                List<Long> basicList = getBrandIds(List.of(basicBrand.split(",")));
-                basicList.removeAll(getBrandIds(filterList));
-                boothList = boothRepository.findBoothMapNotIn(curx, cury, nex-curx, ney-cury, basicList);
-            } else if (!filter.isBlank()) {
-                // 포함하는 방향으로
-                boothList = boothRepository.findBoothMapIn(curx, cury, nex-curx, ney-cury, getBrandIds(filterList));
+
+            if (!filter.isBlank()) {
+                Boolean include = checkFilter(filter);
+                List<Long> filterNum = getBrandList(filter, include);
+
+                boothList = boothRepository.findBoothMap(curx, cury, nex-curx, ney-cury, filterNum, include);
             }
 
             List<BoothMapDto> list = boothList.stream()
@@ -53,7 +49,6 @@ public class BoothService {
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
             }};
-
             return boothMap;
 
         } catch (NullPointerException e) {
@@ -63,17 +58,13 @@ public class BoothService {
 
     public Map<String, Object> getBoothList(Double curx, Double cury, int count, String filter) throws BaseException {
         try {
-            List<String> filterList = List.of(filter.split(","));
-
             List<Tuple> boothList = new ArrayList<>();
-            if (filterList.contains("기타")) {
-                // 제외하는 방향으로
-                List<Long> basicList = getBrandIds(List.of(basicBrand.split(",")));
-                basicList.removeAll(getBrandIds(filterList));
-                boothList = boothRepository.findBoothListNotIn(curx, cury, count, basicList);
-            } else if (!filter.isBlank()) {
-                // 포함하는 방향으로
-                boothList = boothRepository.findBoothListIn(curx, cury, count, getBrandIds(filterList));
+
+            if (!filter.isBlank()) {
+                Boolean include = checkFilter(filter);
+                List<Long> filterNum = getBrandList(filter, include);
+
+                boothList = boothRepository.findBoothList(curx, cury, count, filterNum, include);
             }
 
             List<BoothListDto> list = boothList.stream()
@@ -108,21 +99,13 @@ public class BoothService {
                 throw new BaseException(ResponseStatus.EMPTY_KEYWORD);
             }
 
-            List<String> filterList = List.of(filter.split(","));
+            List<BoothEntity> boothList = new ArrayList<>();
+            if (!filter.isBlank()) {
+                Boolean include = checkFilter(filter);
+                List<Long> filterNum = getBrandList(filter, include);
 
-            List<Long> filterNum = new ArrayList<>();
-            Boolean include = true;
-            if (filterList.contains("기타")) {
-                // 제외하는 방향으로
-                filterNum = getBrandIds(List.of(basicBrand.split(",")));
-                filterNum.removeAll(getBrandIds(filterList));
-                include = false;
-            } else if (!filter.isBlank()) {
-                // 포함하는 방향으로
-                filterNum = getBrandIds(filterList);
+                boothList = boothRepository.findBoothSearch(keyword, filterNum, include);
             }
-
-            List<BoothEntity> boothList = boothRepository.findBoothSearch(keyword, filterNum, include);
 
             List<BoothMapDto> list = boothList.stream()
                     .map(b -> BoothMapDto.builder()
@@ -142,6 +125,28 @@ public class BoothService {
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         } catch (BaseException e) {
             throw new BaseException(e.getStatus());
+        }
+    }
+
+    public Boolean checkFilter(String filter) {
+        if (filter.contains("기타")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public List<Long> getBrandList(String filter, Boolean include) throws NullPointerException {
+        List<String> filterList = List.of(filter.split(","));
+
+        if (include.equals(false)) {
+            // 제외하는 방향으로
+            List<Long> filterNum = getBrandIds(List.of(basicBrand.split(",")));
+            filterNum.removeAll(getBrandIds(filterList));
+            return filterNum;
+        } else {
+            // 포함하는 방향으로
+            return getBrandIds(filterList);
         }
     }
 
