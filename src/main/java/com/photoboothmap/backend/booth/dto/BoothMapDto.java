@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 public class BoothMapDto {
 
-    private Long boothIdx;
+    private Long id;
 
     private String brand;
 
