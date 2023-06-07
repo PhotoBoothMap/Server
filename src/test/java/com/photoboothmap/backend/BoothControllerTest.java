@@ -33,6 +33,7 @@ public class BoothControllerTest {
     String wrongBrand = "인생세컷,기타";
     ResponseStatus rangeError = ResponseStatus.WRONG_LATLNG_RANGE;
     ResponseStatus nameError = ResponseStatus.WRONG_BRAND_NAME;
+    ResponseStatus keywordError = ResponseStatus.EMPTY_KEYWORD;
 
     @BeforeEach
     public void setup() {
@@ -862,5 +863,133 @@ public class BoothControllerTest {
     }
 
     /* /map/list test end ---------------------------------------------------------------------------------------------------------------------------------- */
+
+    /* /map/search test start ------------------------------------------------------------------------------------------------------------------------------ */
+    private String mapSearchUrl = "/map/search?keyword={v1}&filter={v2}";
+
+    @Test
+    @DisplayName("[GET-OK] booth search")
+    public void booth_search_성공() throws Exception {
+
+        // given
+
+        // when
+        MvcResult result = mvc.perform(get(mapSearchUrl,
+                        "강남역", allBrand))
+
+        // then
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(jsonPath("$.success").value("true"))
+                .andExpect(jsonPath("$.result.boothList").isArray())
+                .andExpect(jsonPath("$.result.boothList.length()").value(5))
+                .andReturn();
+
+        String jsonRes = "{\"success\":true," +
+                "\"result\":{\"boothList\":" +
+                "[" +
+                "{\"boothIdx\":2087,\"brand\":\"인생네컷\",\"latitude\":37.5029765,\"longitude\":127.02623783}," +
+                "{\"boothIdx\":2088,\"brand\":\"하루필름\",\"latitude\":37.50308788,\"longitude\":127.02774881}," +
+                "{\"boothIdx\":2095,\"brand\":\"포토시그니처\",\"latitude\":37.50242142,\"longitude\":127.02652263}," +
+                "{\"boothIdx\":2129,\"brand\":\"모노맨션\",\"latitude\":37.50182937,\"longitude\":127.02690468}," +
+                "{\"boothIdx\":5996,\"brand\":\"그믐달셀프스튜디오\",\"latitude\":37.50253651,\"longitude\":127.02756087}" +
+                "]" +
+                "}}";
+        Assertions.assertEquals(result.getResponse().getContentAsString(), jsonRes);
+
+        /* 예상 결과
+        {
+            "success": true,
+            "result": {
+                "boothList": [
+                    {
+                        "boothIdx": 2087,
+                        "brand": "인생네컷",
+                        "latitude": 37.5029765,
+                        "longitude": 127.02623783
+                    },
+                    {
+                        "boothIdx": 2088,
+                        "brand": "하루필름",
+                        "latitude": 37.50308788,
+                        "longitude": 127.02774881
+                    },
+                    {
+                        "boothIdx": 2095,
+                        "brand": "포토시그니처",
+                        "latitude": 37.50242142,
+                        "longitude": 127.02652263
+                    },
+                    {
+                        "boothIdx": 2129,
+                        "brand": "모노맨션",
+                        "latitude": 37.50182937,
+                        "longitude": 127.02690468
+                    },
+                    {
+                        "boothIdx": 5996,
+                        "brand": "그믐달셀프스튜디오",
+                        "latitude": 37.50253651,
+                        "longitude": 127.02756087
+                    }
+                ]
+            }
+        }
+        */
+
+    }
+
+    @Test
+    @DisplayName("[GET-OK] booth search (empty)")
+    public void booth_search_성공_빈리스트() throws Exception {
+        // given
+
+        // when
+        mvc.perform(get(mapSearchUrl,
+                        "이런이름가진건없을껄", allBrand))
+
+        // then
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(jsonPath("$.success").value("true"))
+                .andExpect(jsonPath("$.result.boothList").isArray())
+                .andExpect(jsonPath("$.result.boothList").isEmpty());
+
+        /* 예상 결과
+        {
+            "success": true,
+            "result": {
+                "boothList": []
+            }
+        }
+        */
+
+    }
+
+    @Test
+    @DisplayName("[GET-fail] booth search - empty keyword")
+    public void booth_search_실패_빈검색어() throws Exception {
+        // given
+
+        // when
+        mvc.perform(get(mapSearchUrl,
+                        " ", allBrand))
+
+        // then
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(status().is(keywordError.getCode()))
+                .andExpect(jsonPath("$.success").value(keywordError.isSuccess()))
+                .andExpect(jsonPath("$.message").value(keywordError.getMessage()));
+
+        /* 예상 결과
+        {
+            "success": false,
+            "message": "empty keyword"
+        }
+        */
+
+    }
+
+    /* /map/search test end -------------------------------------------------------------------------------------------------------------------------------- */
 
 }
