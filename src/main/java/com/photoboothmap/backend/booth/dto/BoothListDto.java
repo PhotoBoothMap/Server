@@ -20,8 +20,5 @@ public class BoothListDto {
 
     private Long reviewNum;
 
-    private Double latitude;
-
-    private Double longitude;
-
+    private CoordinateDto coordinate;
 }

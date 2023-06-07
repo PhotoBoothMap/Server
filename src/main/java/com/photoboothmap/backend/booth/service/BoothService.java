@@ -2,6 +2,7 @@ package com.photoboothmap.backend.booth.service;
 
 import com.photoboothmap.backend.booth.dto.BoothListDto;
 import com.photoboothmap.backend.booth.dto.BoothMapDto;
+import com.photoboothmap.backend.booth.dto.CoordinateDto;
 import com.photoboothmap.backend.booth.entity.BoothEntity;
 import com.photoboothmap.backend.booth.repository.BoothRepository;
 import com.photoboothmap.backend.brand.repository.BrandRepository;
@@ -41,8 +42,10 @@ public class BoothService {
                     .map(b -> BoothMapDto.builder()
                             .boothIdx(b.getId())
                             .brand(b.getBrand().getName())
-                            .latitude(b.getLatitude())
-                            .longitude(b.getLongitude())
+                            .coordinate(CoordinateDto.builder()
+                                    .lat(b.getLatitude())
+                                    .lng(b.getLongitude())
+                                    .build())
                             .build())
                     .collect(Collectors.toList());
 
@@ -76,8 +79,10 @@ public class BoothService {
                             .distance((int) Math.round(b.get("distance", Double.class)))
                             .score(reviewRepository.averageStarRateByBoothIdx(b.get("id", BigInteger.class).longValue()))
                             .reviewNum(reviewRepository.countByPhotoBooth_Id(b.get("id", BigInteger.class).longValue()))
-                            .latitude(b.get("latitude", Double.class))
-                            .longitude(b.get("longitude", Double.class))
+                            .coordinate(CoordinateDto.builder()
+                                    .lat(b.get("latitude", Double.class))
+                                    .lng(b.get("longitude", Double.class))
+                                    .build())
                             .build()
                     ).collect(Collectors.toList());
 
@@ -111,8 +116,10 @@ public class BoothService {
                     .map(b -> BoothMapDto.builder()
                             .boothIdx(b.getId())
                             .brand(b.getBrand().getName())
-                            .latitude(b.getLatitude())
-                            .longitude(b.getLongitude())
+                            .coordinate(CoordinateDto.builder()
+                                    .lat(b.getLatitude())
+                                    .lng(b.getLongitude())
+                                    .build())
                             .build())
                     .collect(Collectors.toList());
 

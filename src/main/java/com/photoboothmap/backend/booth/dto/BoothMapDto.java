@@ -12,7 +12,5 @@ public class BoothMapDto {
 
     private String brand;
 
-    private Double latitude;
-
-    private Double longitude;
+    private CoordinateDto coordinate;
 }
