@@ -46,4 +46,17 @@ public class BoothController {
         }
     }
 
+    @ResponseBody
+    @GetMapping("/map/search")
+    public ResponseEntity<BaseResponse> getBoothSearch(
+            @RequestParam String keyword,
+            @RequestParam String filter) {
+        try {
+            Map<String, Object> boothList = boothService.getBoothSearch(keyword, filter);
+            return new BaseResponse<>(boothList).convert();
+        } catch (BaseException ex) {
+            return new BaseResponse<>(ex.getStatus()).convert();
+        }
+    }
+
 }
