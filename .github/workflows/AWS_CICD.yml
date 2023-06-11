@@ -35,7 +35,7 @@ jobs:
     - name: Copy secret
       env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
-      run: echo APPLICATION_SECRET | base64 --decode > src/main/resources/application-secret.yml
+      run: echo $APPLICATION_SECRET | base64 --decode > src/main/resources/application-secret.yml
 
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
