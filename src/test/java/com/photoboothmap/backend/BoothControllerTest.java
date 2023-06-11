@@ -933,7 +933,7 @@ public class BoothControllerTest {
     /* /map/list test end ---------------------------------------------------------------------------------------------------------------------------------- */
 
     /* /map/search test start ------------------------------------------------------------------------------------------------------------------------------ */
-    private String mapSearchUrl = "/map/search?keyword={v1}&filter={v2}";
+    private String mapSearchUrl = "/map/search?curx={v1}&cury={v2}&nex={v3}&ney={v4}&keyword={v5}";
 
     @Test
     @DisplayName("[GET-OK] booth search")
@@ -943,24 +943,20 @@ public class BoothControllerTest {
 
         // when
         MvcResult result = mvc.perform(get(mapSearchUrl,
-                        "강남역", allBrand))
+                        127.068308, 37.543405, 127.073633, 37.546472, "모노맨션"))
 
         // then
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json;charset=utf8"))
                 .andExpect(jsonPath("$.success").value("true"))
                 .andExpect(jsonPath("$.result.boothList").isArray())
-                .andExpect(jsonPath("$.result.boothList.length()").value(5))
+                .andExpect(jsonPath("$.result.boothList.length()").value(1))
                 .andReturn();
 
         String jsonRes = "{\"success\":true," +
                 "\"result\":{\"boothList\":" +
                 "[" +
-                "{\"id\":2087,\"brand\":\"인생네컷\",\"coordinate\":{\"lat\":37.5029765,\"lng\":127.02623783}}," +
-                "{\"id\":2088,\"brand\":\"하루필름\",\"coordinate\":{\"lat\":37.50308788,\"lng\":127.02774881}}," +
-                "{\"id\":2095,\"brand\":\"포토시그니처\",\"coordinate\":{\"lat\":37.50242142,\"lng\":127.02652263}}," +
-                "{\"id\":2129,\"brand\":\"모노맨션\",\"coordinate\":{\"lat\":37.50182937,\"lng\":127.02690468}}," +
-                "{\"id\":5996,\"brand\":\"그믐달셀프스튜디오\",\"coordinate\":{\"lat\":37.50253651,\"lng\":127.02756087}}" +
+                "{\"id\":21096,\"brand\":\"모노맨션\",\"coordinate\":{\"lat\":37.54144301,\"lng\":127.06878521}}" +
                 "]" +
                 "}}";
         Assertions.assertEquals(result.getResponse().getContentAsString(), jsonRes);
@@ -971,43 +967,11 @@ public class BoothControllerTest {
             "result": {
                 "boothList": [
                     {
-                        "id": 2087,
-                        "brand": "인생네컷",
-                        "coordinate": {
-                            "lat": 37.5029765,
-                            "lng": 127.02623783
-                        }
-                    },
-                    {
-                        "id": 2088,
-                        "brand": "하루필름",
-                        "coordinate": {
-                            "lat": 37.50308788,
-                            "lng": 127.02774881
-                        }
-                    },
-                    {
-                        "id": 2095,
-                        "brand": "포토시그니처",
-                        "coordinate": {
-                            "lat": 37.50242142,
-                            "lng": 127.02652263
-                        }
-                    },
-                    {
-                        "id": 2129,
+                        "id": 21096,
                         "brand": "모노맨션",
                         "coordinate": {
-                            "lat": 37.50182937,
-                            "lng": 127.02690468
-                        }
-                    },
-                    {
-                        "id": 5996,
-                        "brand": "그믐달셀프스튜디오",
-                        "coordinate": {
-                            "lat": 37.50253651,
-                            "lng": 127.02756087
+                            "lat": 37.54144301,
+                            "lng": 127.06878521
                         }
                     }
                 ]
@@ -1024,7 +988,7 @@ public class BoothControllerTest {
 
         // when
         mvc.perform(get(mapSearchUrl,
-                        "이런이름가진건없을껄", allBrand))
+                127.068308, 37.543405, 127.073633, 37.544405, "모노맨션"))
 
         // then
                 .andExpect(status().isOk())
@@ -1045,13 +1009,37 @@ public class BoothControllerTest {
     }
 
     @Test
+    @DisplayName("[GET-fail] booth search - wrong brand")
+    public void booth_search_실패_브랜드명() throws Exception {
+        // given
+
+        // when
+        mvc.perform(get(mapSearchUrl,
+                        127.068308, 37.543405, 127.073633, 37.546472, "모노맨숀"))
+
+        // then
+                .andExpect(content().contentType("application/json;charset=utf8"))
+                .andExpect(status().is(nameError.getCode()))
+                .andExpect(jsonPath("$.success").value(nameError.isSuccess()))
+                .andExpect(jsonPath("$.message").value(nameError.getMessage()));
+
+        /* 예상 결과
+        {
+            "success": false,
+            "message": "wrong brand name"
+        }
+        */
+
+    }
+
+    @Test
     @DisplayName("[GET-fail] booth search - empty keyword")
     public void booth_search_실패_빈검색어() throws Exception {
         // given
 
         // when
         mvc.perform(get(mapSearchUrl,
-                        " ", allBrand))
+            127.068308, 37.543405, 127.073633, 37.546472, " "))
 
         // then
                 .andExpect(content().contentType("application/json;charset=utf8"))
