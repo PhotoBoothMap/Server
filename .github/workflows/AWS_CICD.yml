@@ -44,6 +44,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build -x test
       shell: bash
+      with: $APPLICATION_SECRET
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
