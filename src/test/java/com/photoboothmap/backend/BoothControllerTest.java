@@ -373,7 +373,7 @@ public class BoothControllerTest {
         /* 예상 결과
         {
             "success": false,
-            "message": "wrong latitude/longitude range"
+            "message": "wrong brand name"
         }
         */
 
@@ -924,7 +924,7 @@ public class BoothControllerTest {
         /* 예상 결과
         {
             "success": false,
-            "message": "wrong latitude/longitude range"
+            "message": "wrong brand name"
         }
         */
 
