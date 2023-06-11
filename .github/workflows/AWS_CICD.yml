@@ -34,18 +34,15 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
 
-    # inject application-secret
-    - name: Inject application-secret.yml
-      env:
-          APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
-      run: |
-          echo "$APPLICATION_SECRET" > application-secret.yml
-
     # (3) Gradle build (Test 제외)
     - name: Build with Gradle
+      env:
+        APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
       uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
       with:
         arguments: clean build -x test
+        additional-options: |
+          -Dapplication.secret="$APPLICATION_SECRET"
 
     # (4) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용)
     - name: Configure AWS credentials
