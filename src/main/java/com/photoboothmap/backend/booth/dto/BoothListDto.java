@@ -6,7 +6,7 @@ import lombok.Getter;
 @Builder
 @Getter
 public class BoothListDto {
-    private Long boothIdx;
+    private Long id;
 
     private String brand;
 
@@ -20,8 +20,5 @@ public class BoothListDto {
 
     private Long reviewNum;
 
-    private Double latitude;
-
-    private Double longitude;
-
+    private CoordinateDto coordinate;
 }

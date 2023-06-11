@@ -2,6 +2,7 @@ package com.photoboothmap.backend.booth.service;
 
 import com.photoboothmap.backend.booth.dto.BoothListDto;
 import com.photoboothmap.backend.booth.dto.BoothMapDto;
+import com.photoboothmap.backend.booth.dto.CoordinateDto;
 import com.photoboothmap.backend.booth.entity.BoothEntity;
 import com.photoboothmap.backend.booth.repository.BoothRepository;
 import com.photoboothmap.backend.brand.repository.BrandRepository;
@@ -37,14 +38,7 @@ public class BoothService {
                 boothList = boothRepository.findBoothMap(curx, cury, nex-curx, ney-cury, filterNum, include);
             }
 
-            List<BoothMapDto> list = boothList.stream()
-                    .map(b -> BoothMapDto.builder()
-                            .boothIdx(b.getId())
-                            .brand(b.getBrand().getName())
-                            .latitude(b.getLatitude())
-                            .longitude(b.getLongitude())
-                            .build())
-                    .collect(Collectors.toList());
+            List<BoothMapDto> list = convertToBoothMapDto(boothList);
 
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
@@ -69,15 +63,17 @@ public class BoothService {
 
             List<BoothListDto> list = boothList.stream()
                     .map(b -> BoothListDto.builder()
-                            .boothIdx(b.get("id", BigInteger.class).longValue())
+                            .id(b.get("id", BigInteger.class).longValue())
                             .brand(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName())
                             .name(b.get("name", String.class))
                             .address(b.get("address", String.class))
                             .distance((int) Math.round(b.get("distance", Double.class)))
                             .score(reviewRepository.averageStarRateByBoothIdx(b.get("id", BigInteger.class).longValue()))
                             .reviewNum(reviewRepository.countByPhotoBooth_Id(b.get("id", BigInteger.class).longValue()))
-                            .latitude(b.get("latitude", Double.class))
-                            .longitude(b.get("longitude", Double.class))
+                            .coordinate(CoordinateDto.builder()
+                                    .lat(b.get("latitude", Double.class))
+                                    .lng(b.get("longitude", Double.class))
+                                    .build())
                             .build()
                     ).collect(Collectors.toList());
 
@@ -107,14 +103,7 @@ public class BoothService {
                 boothList = boothRepository.findBoothSearch(keyword, filterNum, include);
             }
 
-            List<BoothMapDto> list = boothList.stream()
-                    .map(b -> BoothMapDto.builder()
-                            .boothIdx(b.getId())
-                            .brand(b.getBrand().getName())
-                            .latitude(b.getLatitude())
-                            .longitude(b.getLongitude())
-                            .build())
-                    .collect(Collectors.toList());
+            List<BoothMapDto> list = convertToBoothMapDto(boothList);
 
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
@@ -126,6 +115,19 @@ public class BoothService {
         } catch (BaseException e) {
             throw new BaseException(e.getStatus());
         }
+    }
+
+    public List<BoothMapDto> convertToBoothMapDto(List<BoothEntity> boothList) {
+        return boothList.stream()
+                .map(b -> BoothMapDto.builder()
+                        .id(b.getId())
+                        .brand(b.getBrand().getName())
+                        .coordinate(CoordinateDto.builder()
+                                .lat(b.getLatitude())
+                                .lng(b.getLongitude())
+                                .build())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     public Boolean checkFilter(String filter) {

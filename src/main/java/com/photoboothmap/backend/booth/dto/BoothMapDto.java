@@ -8,11 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 public class BoothMapDto {
 
-    private Long boothIdx;
+    private Long id;
 
     private String brand;
 
-    private Double latitude;
-
-    private Double longitude;
+    private CoordinateDto coordinate;
 }
