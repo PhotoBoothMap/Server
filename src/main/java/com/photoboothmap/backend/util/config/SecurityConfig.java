@@ -60,8 +60,7 @@ public class SecurityConfig {
         http.formLogin().disable();
         http
                 // cors
-                .cors().configurationSource(corsConfigurationSource())
-                .and()
+                .cors().disable()
                 // jwt 토큰 사용을 위한 설정
                 .csrf().disable()
                 .httpBasic().disable()
