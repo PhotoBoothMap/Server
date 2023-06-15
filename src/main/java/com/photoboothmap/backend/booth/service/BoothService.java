@@ -25,7 +25,7 @@ public class BoothService {
     private final BoothRepository boothRepository;
     private final BrandRepository brandRepository;
     private final ReviewRepository reviewRepository;
-    private final String basicBrand = "포토이즘,하루필름,포토시그니처,인생네컷,셀픽스";
+    private final String basicBrand = "포토이즘,하루필름,포토매틱,인생네컷,셀픽스,포토그레이";
 
     public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) throws BaseException {
         try {
