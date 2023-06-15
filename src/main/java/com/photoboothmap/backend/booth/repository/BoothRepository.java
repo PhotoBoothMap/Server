@@ -41,12 +41,14 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
 
     @Query(value = "select * " +
             "from photo_booth b " +
-            "where name like CONCAT('%', :keyword, '%') and " +
-            "IF(:include, brand IN (:list)," +
-            "(COALESCE(:list, 0) = 0 OR brand NOT IN (:list)))"
+            "where b.longitude between (:lng-:width) and (:lng+:width) and " +
+            "b.latitude between (:lat-:height) and (:lat+:height) and " +
+            "b.brand = :brandNum"
             , nativeQuery = true)
     List<BoothEntity> findBoothSearch(
-            @Param("keyword") String keyword,
-            @Param("list") List<Long> list,
-            @Param("include") Boolean include);
+            @Param("lng") Double curx,
+            @Param("lat") Double cury,
+            @Param("width") Double width,
+            @Param("height") Double height,
+            @Param("brandNum") Long brandNum);
 }

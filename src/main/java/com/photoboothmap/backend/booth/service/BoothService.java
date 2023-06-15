@@ -89,19 +89,14 @@ public class BoothService {
         }
     }
 
-    public Map<String, Object> getBoothSearch(String keyword, String filter) throws BaseException {
+    public Map<String, Object> getBoothSearch(Double curx, Double cury, Double nex, Double ney, String keyword) throws BaseException {
         try {
             if (keyword.isBlank()) {
                 throw new BaseException(ResponseStatus.EMPTY_KEYWORD);
             }
 
-            List<BoothEntity> boothList = new ArrayList<>();
-            if (!filter.isBlank()) {
-                Boolean include = checkFilter(filter);
-                List<Long> filterNum = getBrandList(filter, include);
-
-                boothList = boothRepository.findBoothSearch(keyword, filterNum, include);
-            }
+            List<BoothEntity> boothList = boothRepository.findBoothSearch(
+                    curx, cury, nex-curx, ney-cury, brandRepository.getBrandEntityByName(keyword).getId());
 
             List<BoothMapDto> list = convertToBoothMapDto(boothList);
 
