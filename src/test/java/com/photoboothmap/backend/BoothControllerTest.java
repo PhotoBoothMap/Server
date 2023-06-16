@@ -26,8 +26,8 @@ public class BoothControllerTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    String allBrand = "포토이즘,하루필름,포토시그니처,인생네컷,셀픽스,기타";
-    String etcBrand = "인생네컷,포토시그니처,기타";
+    String allBrand = "포토이즘,하루필름,포토매틱,인생네컷,셀픽스,포토그레이,기타";
+    String etcBrand = "인생네컷,포토매틱,포토그레이,기타";
     String noEtcBrand = "포토이즘,하루필름,셀픽스";
 
     String wrongBrand = "인생세컷,기타";
@@ -139,7 +139,7 @@ public class BoothControllerTest {
         Assertions.assertEquals(result.getResponse().getContentAsString(), jsonRes);
 
         /**
-         * test 2: 인생네컷,포토시그니처,기타
+         * test 2: 인생네컷,포토매틱,포토그레이,기타
          */
         // when
         MvcResult result2 = mvc.perform(get(mapUrl,
@@ -184,7 +184,8 @@ public class BoothControllerTest {
                 .andExpect(jsonPath("$.result.boothList").isArray())
                 .andExpect(jsonPath("$.result.boothList.length()").value(4))
                 .andExpect(content().string(not(containsString("인생네컷"))))
-                .andExpect(content().string(not(containsString("포토시그니처"))))
+                .andExpect(content().string(not(containsString("포토매틱"))))
+                .andExpect(content().string(not(containsString("포토그레이"))))
                 .andReturn();
 
         String jsonRes3 = "{\"success\":true," +
