@@ -97,7 +97,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfiguration getCorsConfiguration() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://photohere.co.kr"));
+        configuration.setAllowedOrigins(List.of("https://photohere.co.kr", "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("*"));
