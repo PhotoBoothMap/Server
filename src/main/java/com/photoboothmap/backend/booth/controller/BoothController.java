@@ -49,13 +49,13 @@ public class BoothController {
     @ResponseBody
     @GetMapping("/map/search")
     public ResponseEntity<BaseResponse> getBoothSearch(
-            @RequestParam Double curx,
-            @RequestParam Double cury,
-            @RequestParam Double nex,
-            @RequestParam Double ney,
+            @RequestParam Double clng,
+            @RequestParam Double clat,
+            @RequestParam Double nlng,
+            @RequestParam Double nlat,
             @RequestParam String keyword) {
         try {
-            Map<String, Object> boothList = boothService.getBoothSearch(curx, cury, nex, ney, keyword);
+            Map<String, Object> boothList = boothService.getBoothSearch(clng, clat, nlng, nlat, keyword);
             return new BaseResponse<>(boothList).convert();
         } catch (BaseException ex) {
             return new BaseResponse<>(ex.getStatus()).convert();
