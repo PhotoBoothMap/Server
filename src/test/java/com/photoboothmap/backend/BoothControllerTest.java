@@ -41,7 +41,7 @@ public class BoothControllerTest {
     }
 
     /* /map test start ------------------------------------------------------------------------------------------------------------------------------------- */
-    private String mapUrl = "/map?curx={v1}&cury={v2}&nex={v3}&ney={v4}&filter={v5}";
+    private String mapUrl = "/map?clng={v1}&clat={v2}&nlng={v3}&nlat={v4}&filter={v5}";
 
     @Test
     @DisplayName("[GET-OK] booth pin")
@@ -383,7 +383,7 @@ public class BoothControllerTest {
     /* /map test end --------------------------------------------------------------------------------------------------------------------------------------- */
 
     /* /map/list test start -------------------------------------------------------------------------------------------------------------------------------- */
-    private String mapListUrl = "/map/list?curx={v1}&cury={v2}&count={v3}&filter={v4}";
+    private String mapListUrl = "/map/list?clng={v1}&clat={v2}&count={v3}&filter={v4}";
 
     @Test
     @DisplayName("[GET-OK] booth list")
@@ -934,7 +934,7 @@ public class BoothControllerTest {
     /* /map/list test end ---------------------------------------------------------------------------------------------------------------------------------- */
 
     /* /map/search test start ------------------------------------------------------------------------------------------------------------------------------ */
-    private String mapSearchUrl = "/map/search?curx={v1}&cury={v2}&nex={v3}&ney={v4}&keyword={v5}";
+    private String mapSearchUrl = "/map/search?clng={v1}&clat={v2}&nlng={v3}&nlat={v4}&keyword={v5}";
 
     @Test
     @DisplayName("[GET-OK] booth search")

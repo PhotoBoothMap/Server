@@ -27,7 +27,7 @@ public class BoothService {
     private final ReviewRepository reviewRepository;
     private final String basicBrand = "포토이즘,하루필름,포토매틱,인생네컷,셀픽스,포토그레이";
 
-    public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) throws BaseException {
+    public Map<String, Object> getBoothMap(Double clng, Double clat, Double nlng, Double nlat, String filter) throws BaseException {
         try {
             List<BoothEntity> boothList = new ArrayList<>();
 
@@ -35,7 +35,7 @@ public class BoothService {
                 Boolean include = checkFilter(filter);
                 List<Long> filterNum = getBrandList(filter, include);
 
-                boothList = boothRepository.findBoothMap(curx, cury, nex-curx, ney-cury, filterNum, include);
+                boothList = boothRepository.findBoothMap(clng, clat, nlng-clng, nlat-clat, filterNum, include);
             }
 
             List<BoothMapDto> list = convertToBoothMapDto(boothList);
@@ -50,7 +50,7 @@ public class BoothService {
         }
     }
 
-    public Map<String, Object> getBoothList(Double curx, Double cury, int count, String filter) throws BaseException {
+    public Map<String, Object> getBoothList(Double clng, Double clat, int count, String filter) throws BaseException {
         try {
             List<Tuple> boothList = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class BoothService {
                 Boolean include = checkFilter(filter);
                 List<Long> filterNum = getBrandList(filter, include);
 
-                boothList = boothRepository.findBoothList(curx, cury, count, filterNum, include);
+                boothList = boothRepository.findBoothList(clng, clat, count, filterNum, include);
             }
 
             List<BoothListDto> list = boothList.stream()
@@ -89,14 +89,14 @@ public class BoothService {
         }
     }
 
-    public Map<String, Object> getBoothSearch(Double curx, Double cury, Double nex, Double ney, String keyword) throws BaseException {
+    public Map<String, Object> getBoothSearch(Double clng, Double clat, Double nlng, Double nlat, String keyword) throws BaseException {
         try {
             if (keyword.isBlank()) {
                 throw new BaseException(ResponseStatus.EMPTY_KEYWORD);
             }
 
             List<BoothEntity> boothList = boothRepository.findBoothSearch(
-                    curx, cury, nex-curx, ney-cury, brandRepository.getBrandEntityByName(keyword).getId());
+                    clng, clat, nlng-clng, nlat-clat, brandRepository.getBrandEntityByName(keyword).getId());
 
             List<BoothMapDto> list = convertToBoothMapDto(boothList);
 

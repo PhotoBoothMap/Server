@@ -18,8 +18,8 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             "(COALESCE(:list, 0) = 0 OR brand NOT IN (:list)))"
             , nativeQuery = true)
     List<BoothEntity> findBoothMap(
-            @Param("lng") Double curx,
-            @Param("lat") Double cury,
+            @Param("lng") Double clng,
+            @Param("lat") Double clat,
             @Param("width") Double width,
             @Param("height") Double height,
             @Param("list") List<Long> list,
@@ -33,8 +33,8 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             "limit :offset, 10"
             , nativeQuery = true)
     List<Tuple> findBoothList(
-            @Param("lng") Double curx,
-            @Param("lat") Double cury,
+            @Param("lng") Double clng,
+            @Param("lat") Double clat,
             @Param("offset") int offset,
             @Param("list") List<Long> list,
             @Param("include") Boolean include);
@@ -46,8 +46,8 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             "b.brand = :brandNum"
             , nativeQuery = true)
     List<BoothEntity> findBoothSearch(
-            @Param("lng") Double curx,
-            @Param("lat") Double cury,
+            @Param("lng") Double clng,
+            @Param("lat") Double clat,
             @Param("width") Double width,
             @Param("height") Double height,
             @Param("brandNum") Long brandNum);
