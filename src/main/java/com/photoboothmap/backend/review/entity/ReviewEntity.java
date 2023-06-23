@@ -1,10 +1,8 @@
 package com.photoboothmap.backend.review.entity;
 
 import com.photoboothmap.backend.booth.entity.BoothEntity;
-import com.photoboothmap.backend.user.entity.UserEntity;
+import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.util.entity.BaseTimeEntity;
-import com.photoboothmap.backend.util.entity.LoginType;
-import com.photoboothmap.backend.util.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,8 +32,8 @@ public class ReviewEntity extends BaseTimeEntity {
     private BoothEntity photoBooth;
 
     @ManyToOne
-    @JoinColumn(name = "user")
-    private UserEntity user;
+    @JoinColumn(name = "member")
+    private Member member;
 
     @Column(nullable = false)
     private String content;
