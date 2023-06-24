@@ -112,7 +112,7 @@ public class BoothService {
             throw new BaseException(e.getStatus());
         }
     }
-    
+
     public List<Long> getBrandList(String filter, Boolean include) throws NullPointerException {
         List<String> filterList = List.of(filter.split(","));
 
