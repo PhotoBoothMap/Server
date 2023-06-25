@@ -152,4 +152,13 @@ public class BoothService {
                 .map(b -> brandRepository.getBrandEntityByName(b).getId())
                 .collect(Collectors.toList());
     }
+
+    public BoothEntity getEntityById(Long id) throws BaseException {
+        Optional<BoothEntity> boothOptional = boothRepository.findByIdAndStatus(id, "active");
+        if (boothOptional.isEmpty()) {
+            throw new BaseException(ResponseStatus.INVALID_BOOTH);
+        } else {
+            return boothOptional.get();
+        }
+    }
 }
