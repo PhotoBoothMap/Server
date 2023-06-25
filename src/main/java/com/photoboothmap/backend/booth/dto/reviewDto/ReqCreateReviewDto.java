@@ -6,19 +6,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReqCreateReviewDto {
-//    private Long boothId;
-//    private MultipartFile[] files;
-//    private float starRate;
-    List<TagType> userTags;
+    private float starRate;
+    private Optional<String> content;
+    private List<TagType> userTags;
 
     private void setUserTags(List<String> userTags){
         this.userTags = ReviewUtils.convertStringToTagEnum(userTags);
