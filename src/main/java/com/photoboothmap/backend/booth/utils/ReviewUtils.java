@@ -12,4 +12,12 @@ public class ReviewUtils {
                         tag -> TagType.valueOf(tag)
                 ).collect(Collectors.toList());
     }
+
+    public static String getFileExtension(String fileName) {
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex != -1 && dotIndex < fileName.length() - 1) {
+            return fileName.substring(dotIndex);
+        }
+        return "";
+    }
 }
