@@ -20,8 +20,10 @@ public class Member {
     private Long id;
 
     private String email;
-    private String password; // Credential
     private String nickname;
+
+    // 임시 credential
+    private String password;
 
     //role 추가.
     @Column(nullable = false)
@@ -30,7 +32,7 @@ public class Member {
 
     // 프로필 이미지 url 추가.
     @Column
-    private String profile_image_url;
+    private String profileImageUrl;
 
     private OAuthProvider oAuthProvider;
 
@@ -43,20 +45,17 @@ public class Member {
     }
 
     @Builder
-    public Member(String email, String nickname,  String password, String profile_image_url, Role role, OAuthProvider oAuthProvider) {
-        log.info("------------------- role의 값: {}", role);
-        log.info("------------------- 이메일 값: {}", email);
+    public Member(String email, String nickname, String profileImageUrl, Role role, OAuthProvider oAuthProvider) {
         this.email = email;
         this.nickname = nickname;
-        this.password = password;
-        this.profile_image_url = profile_image_url;
+        this.profileImageUrl = profileImageUrl;
         this.role = role;
         this.oAuthProvider = oAuthProvider;
     }
 
     public Member update(String name, String picture){
         this.nickname = name;
-        this.profile_image_url = picture;
+        this.profileImageUrl = picture;
 
         return this;
     }

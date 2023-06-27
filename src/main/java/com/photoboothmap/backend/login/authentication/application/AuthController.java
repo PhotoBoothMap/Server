@@ -41,8 +41,10 @@ public class AuthController {
         Member member = memberRepository.findByNickname(nickname)
                 .orElseThrow(() -> new RuntimeException("Member not found"));
 
-        // 닉네임을 통해 profile_image_url를 찾아온다.
-        String profile_image_url = member.getProfile_image_url();
+        // 닉네임을 통해 profileImageUrl를 찾아온다.
+        String profileImageUrl = member.getProfileImageUrl();
+        // userId를 가져온다.
+        Long userId = member.getId();
 
         // RT 저장
         HttpCookie httpCookie = ResponseCookie.from("refresh-token", tokens.getRefreshToken())
@@ -51,10 +53,10 @@ public class AuthController {
                 .secure(true)*/
                 .build();
 
-
         LoginDto loginDto = LoginDto.builder()
                 .nickname(nickname)
-                .profile_image_url(profile_image_url)
+                .profileImageUrl(profileImageUrl)
+                .userId(userId)
                 .build();
 
 

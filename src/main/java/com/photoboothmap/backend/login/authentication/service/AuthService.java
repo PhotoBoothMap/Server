@@ -126,7 +126,7 @@ public class AuthService {
 
     private String findProfileImage(OAuthInfoResponse oAuthInfoResponse) {
         return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
-                .map(Member::getProfile_image_url)
+                .map(Member::getProfileImageUrl)
                 .orElse("noImage");
     }
 
@@ -134,7 +134,7 @@ public class AuthService {
         Member member = Member.builder()
                 .email(oAuthInfoResponse.getEmail())
                 .nickname(oAuthInfoResponse.getNickname())
-                .profile_image_url(oAuthInfoResponse.getProfileImageUrl())
+                .profileImageUrl(oAuthInfoResponse.getProfileImageUrl())
                 .oAuthProvider(oAuthInfoResponse.getOAuthProvider())
                 .role(Member.Role.USER) // 추가.
                 .build();
