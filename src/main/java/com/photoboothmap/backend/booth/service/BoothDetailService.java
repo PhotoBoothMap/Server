@@ -8,13 +8,12 @@ import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
 import com.photoboothmap.backend.review.entity.ReviewEntity;
 import com.photoboothmap.backend.review.entity.TagEntity;
-import com.photoboothmap.backend.review.repository.ImageRepository;
 import com.photoboothmap.backend.review.repository.ReviewRepository;
 import com.photoboothmap.backend.review.repository.TagRepository;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BoothDetailService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
@@ -81,12 +81,17 @@ public class BoothDetailService {
 
             String imageFileName = "image-" + UUID.randomUUID() + fileExtension;
             Files.copy(file.getInputStream(), targetDirectoryPathObj.resolve(imageFileName));
-
-            String imageFilePath = targetDirectoryPath + File.separator + imageFileName;
-            return imageFilePath;
+            log.info("save image {} {}", imageFileName);
+            return targetDirectoryPath + File.separator + imageFileName;
 
         } catch (IOException e){
             throw new BaseException(ResponseStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public void deleteTempImage(String imageUrl){
+        File fileToDelete = new File(imageUrl);
+        boolean result = fileToDelete.delete();
+        log.info("delete image {} {}", imageUrl, result);
     }
 }

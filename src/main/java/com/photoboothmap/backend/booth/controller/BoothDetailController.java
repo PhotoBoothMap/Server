@@ -46,4 +46,13 @@ public class BoothDetailController {
             return new BaseResponse<>(ex.getStatus()).convert();
         }
     }
+
+    @ResponseBody
+    @DeleteMapping("/image")
+    public ResponseEntity<BaseResponse> deleteTempImage(
+            @RequestParam String imageUrl
+    ){
+        boothDetailService.deleteTempImage(imageUrl);
+        return new BaseResponse<>(true).convert();
+    }
 }
