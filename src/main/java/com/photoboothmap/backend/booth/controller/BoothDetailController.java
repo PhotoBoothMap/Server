@@ -24,7 +24,6 @@ public class BoothDetailController {
     ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long userId = Long.parseLong(authentication.getName());
-//        Long userId = 4L;
         try{
             this.boothDetailService.postBoothReview(userId, boothId, reqCreateReviewDto);
             return new BaseResponse<>("리뷰를 등록하였습니다.").convert();

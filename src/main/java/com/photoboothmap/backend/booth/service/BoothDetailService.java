@@ -6,8 +6,10 @@ import com.photoboothmap.backend.booth.repository.BoothRepository;
 import com.photoboothmap.backend.booth.utils.ReviewUtils;
 import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
+import com.photoboothmap.backend.review.entity.ImageEntity;
 import com.photoboothmap.backend.review.entity.ReviewEntity;
 import com.photoboothmap.backend.review.entity.TagEntity;
+import com.photoboothmap.backend.review.repository.ImageRepository;
 import com.photoboothmap.backend.review.repository.ReviewRepository;
 import com.photoboothmap.backend.review.repository.TagRepository;
 import com.photoboothmap.backend.util.config.BaseException;
@@ -35,6 +37,7 @@ public class BoothDetailService {
     private final MemberRepository memberRepository;
     private final BoothRepository boothRepository;
     private final TagRepository tagRepository;
+    private final ImageRepository imageRepository;
 
     public void postBoothReview(
             Long userId,
@@ -62,6 +65,24 @@ public class BoothDetailService {
                     ).collect(Collectors.toList());
 
             tagRepository.saveAll(tagEntityList);
+
+            /**
+             * reqCreateReviewDto.getImageUrls()이 not null 인 경우에만 하고 싶은데 좋은 방법을 모르겠어요!
+             * 리뷰 남겨주시면 감사드리겠습니다
+             */
+
+
+            if (!reqCreateReviewDto.getImageUrls().isEmpty()){
+                List<String> imageUrlList = reqCreateReviewDto.getImageUrls().get();
+                List<ImageEntity> imageEntityList = imageUrlList.stream()
+                        .map(url -> ImageEntity.builder()
+                                .review(newReview)
+                                .imgUrl(url.toString())
+                                .build()
+                        ).collect(Collectors.toList());
+
+                imageRepository.saveAll(imageEntityList);
+            }
 
 
         } catch (EntityNotFoundException e){
