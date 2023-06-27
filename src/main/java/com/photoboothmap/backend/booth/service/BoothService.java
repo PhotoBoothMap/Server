@@ -2,8 +2,10 @@ package com.photoboothmap.backend.booth.service;
 
 import com.photoboothmap.backend.booth.dto.BoothListDto;
 import com.photoboothmap.backend.booth.dto.BoothMapDto;
+import com.photoboothmap.backend.booth.dto.CoordinateDto;
 import com.photoboothmap.backend.booth.entity.BoothEntity;
 import com.photoboothmap.backend.booth.repository.BoothRepository;
+import com.photoboothmap.backend.booth.utils.MapUtils;
 import com.photoboothmap.backend.brand.repository.BrandRepository;
 import com.photoboothmap.backend.review.repository.ReviewRepository;
 import com.photoboothmap.backend.util.config.BaseException;
@@ -24,36 +26,24 @@ public class BoothService {
     private final BoothRepository boothRepository;
     private final BrandRepository brandRepository;
     private final ReviewRepository reviewRepository;
-    private final String basicBrand = "포토이즘,하루필름,포토시그니처,인생네컷,셀픽스";
+    private final String basicBrand = "포토이즘,하루필름,포토매틱,인생네컷,셀픽스,포토그레이";
 
-    public Map<String, Object> getBoothMap(Double curx, Double cury, Double nex, Double ney, String filter) throws BaseException {
+    public Map<String, Object> getBoothMap(Double clng, Double clat, Double nlng, Double nlat, String filter) throws BaseException {
         try {
-            List<String> filterList = List.of(filter.split(","));
-
             List<BoothEntity> boothList = new ArrayList<>();
-            if (filterList.contains("기타")) {
-                // 제외하는 방향으로
-                List<Long> basicList = getBrandIds(List.of(basicBrand.split(",")));
-                basicList.removeAll(getBrandIds(filterList));
-                boothList = boothRepository.findBoothMapNotIn(curx, cury, nex-curx, ney-cury, basicList);
-            } else if (!filter.isBlank()) {
-                // 포함하는 방향으로
-                boothList = boothRepository.findBoothMapIn(curx, cury, nex-curx, ney-cury, getBrandIds(filterList));
+
+            if (!filter.isBlank()) {
+                Boolean include = MapUtils.checkFilter(filter);
+                List<Long> filterNum = getBrandList(filter, include);
+
+                boothList = boothRepository.findBoothMap(clng, clat, nlng-clng, nlat-clat, filterNum, include);
             }
 
-            List<BoothMapDto> list = boothList.stream()
-                    .map(b -> BoothMapDto.builder()
-                            .boothIdx(b.getId())
-                            .brand(b.getBrand().getName())
-                            .latitude(b.getLatitude())
-                            .longitude(b.getLongitude())
-                            .build())
-                    .collect(Collectors.toList());
+            List<BoothMapDto> list = MapUtils.convertToBoothMapDto(boothList);
 
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
             }};
-
             return boothMap;
 
         } catch (NullPointerException e) {
@@ -61,32 +51,30 @@ public class BoothService {
         }
     }
 
-    public Map<String, Object> getBoothList(Double curx, Double cury, int count, String filter) throws BaseException {
+    public Map<String, Object> getBoothList(Double clng, Double clat, int count, String filter) throws BaseException {
         try {
-            List<String> filterList = List.of(filter.split(","));
-
             List<Tuple> boothList = new ArrayList<>();
-            if (filterList.contains("기타")) {
-                // 제외하는 방향으로
-                List<Long> basicList = getBrandIds(List.of(basicBrand.split(",")));
-                basicList.removeAll(getBrandIds(filterList));
-                boothList = boothRepository.findBoothListNotIn(curx, cury, count, basicList);
-            } else if (!filter.isBlank()) {
-                // 포함하는 방향으로
-                boothList = boothRepository.findBoothListIn(curx, cury, count, getBrandIds(filterList));
+
+            if (!filter.isBlank()) {
+                Boolean include = MapUtils.checkFilter(filter);
+                List<Long> filterNum = getBrandList(filter, include);
+
+                boothList = boothRepository.findBoothList(clng, clat, count, filterNum, include);
             }
 
             List<BoothListDto> list = boothList.stream()
                     .map(b -> BoothListDto.builder()
-                            .boothIdx(b.get("id", BigInteger.class).longValue())
+                            .id(b.get("id", BigInteger.class).longValue())
                             .brand(brandRepository.findById(b.get("brand", BigInteger.class).longValue()).get().getName())
                             .name(b.get("name", String.class))
                             .address(b.get("address", String.class))
                             .distance((int) Math.round(b.get("distance", Double.class)))
                             .score(reviewRepository.averageStarRateByBoothIdx(b.get("id", BigInteger.class).longValue()))
                             .reviewNum(reviewRepository.countByPhotoBooth_Id(b.get("id", BigInteger.class).longValue()))
-                            .latitude(b.get("latitude", Double.class))
-                            .longitude(b.get("longitude", Double.class))
+                            .coordinate(CoordinateDto.builder()
+                                    .lat(b.get("latitude", Double.class))
+                                    .lng(b.get("longitude", Double.class))
+                                    .build())
                             .build()
                     ).collect(Collectors.toList());
 
@@ -99,6 +87,43 @@ public class BoothService {
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         } catch (DataIntegrityViolationException e) {
             throw new BaseException(ResponseStatus.WRONG_LATLNG_RANGE);
+        }
+    }
+
+    public Map<String, Object> getBoothSearch(Double clng, Double clat, Double nlng, Double nlat, String keyword) throws BaseException {
+        try {
+            if (keyword.isBlank()) {
+                throw new BaseException(ResponseStatus.EMPTY_KEYWORD);
+            }
+
+            List<BoothEntity> boothList = boothRepository.findBoothSearch(
+                    clng, clat, nlng-clng, nlat-clat, brandRepository.getBrandEntityByName(keyword).getId());
+
+            List<BoothMapDto> list = MapUtils.convertToBoothMapDto(boothList);
+
+            Map<String, Object> boothMap = new HashMap<>() {{
+                put("boothList", list);
+            }};
+            return boothMap;
+
+        } catch (NullPointerException e) {
+            throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
+        } catch (BaseException e) {
+            throw new BaseException(e.getStatus());
+        }
+    }
+
+    public List<Long> getBrandList(String filter, Boolean include) throws NullPointerException {
+        List<String> filterList = List.of(filter.split(","));
+
+        if (include.equals(false)) {
+            // 제외하는 방향으로
+            List<Long> filterNum = getBrandIds(List.of(basicBrand.split(",")));
+            filterNum.removeAll(getBrandIds(filterList));
+            return filterNum;
+        } else {
+            // 포함하는 방향으로
+            return getBrandIds(filterList);
         }
     }
 

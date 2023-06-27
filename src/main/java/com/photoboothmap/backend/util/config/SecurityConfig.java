@@ -23,6 +23,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @Slf4j
 @EnableWebSecurity // Spring Security 설정 클래스
@@ -57,7 +60,7 @@ public class SecurityConfig {
         http.formLogin().disable();
         http
                 // cors
-                .cors().configurationSource(corsConfigurationSource())
+                .cors().configurationSource(cors -> getCorsConfiguration())
                 .and()
                 // jwt 토큰 사용을 위한 설정
                 .csrf().disable()
@@ -92,16 +95,14 @@ public class SecurityConfig {
 
     // cors config
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfiguration getCorsConfiguration() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        configuration.addAllowedOrigin("*");
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
+        configuration.setAllowedOrigins(List.of("https://photohere.co.kr", "http://localhost:3000"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+        return configuration;
     }
 }
