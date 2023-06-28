@@ -35,7 +35,7 @@ public class ReviewEntity extends BaseTimeEntity {
     @JoinColumn(name = "member")
     private Member member;
 
-    @Column(nullable = false)
+    @Column
     private String content;
 
     @Column(nullable = false)
