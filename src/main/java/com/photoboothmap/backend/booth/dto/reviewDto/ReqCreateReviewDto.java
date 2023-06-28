@@ -18,6 +18,7 @@ public class ReqCreateReviewDto {
     private float starRate;
     private Optional<String> content;
     private List<TagType> userTags;
+    private Optional<List<String>> imageUrls;
 
     private void setUserTags(List<String> userTags){
         this.userTags = ReviewUtils.convertStringToTagEnum(userTags);
