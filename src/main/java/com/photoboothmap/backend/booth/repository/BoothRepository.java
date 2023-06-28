@@ -51,6 +51,4 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             @Param("width") Double width,
             @Param("height") Double height,
             @Param("brandNum") Long brandNum);
-
-    BoothEntity getById(Long id);
 }

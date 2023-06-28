@@ -5,7 +5,6 @@ import com.photoboothmap.backend.booth.dto.BoothMapDto;
 import com.photoboothmap.backend.booth.dto.CoordinateDto;
 import com.photoboothmap.backend.booth.entity.BoothEntity;
 import com.photoboothmap.backend.booth.repository.BoothRepository;
-import com.photoboothmap.backend.booth.utils.MapUtils;
 import com.photoboothmap.backend.brand.repository.BrandRepository;
 import com.photoboothmap.backend.review.repository.ReviewRepository;
 import com.photoboothmap.backend.util.config.BaseException;
@@ -33,13 +32,13 @@ public class BoothService {
             List<BoothEntity> boothList = new ArrayList<>();
 
             if (!filter.isBlank()) {
-                Boolean include = MapUtils.checkFilter(filter);
+                Boolean include = checkFilter(filter);
                 List<Long> filterNum = getBrandList(filter, include);
 
                 boothList = boothRepository.findBoothMap(clng, clat, nlng-clng, nlat-clat, filterNum, include);
             }
 
-            List<BoothMapDto> list = MapUtils.convertToBoothMapDto(boothList);
+            List<BoothMapDto> list = convertToBoothMapDto(boothList);
 
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
@@ -56,7 +55,7 @@ public class BoothService {
             List<Tuple> boothList = new ArrayList<>();
 
             if (!filter.isBlank()) {
-                Boolean include = MapUtils.checkFilter(filter);
+                Boolean include = checkFilter(filter);
                 List<Long> filterNum = getBrandList(filter, include);
 
                 boothList = boothRepository.findBoothList(clng, clat, count, filterNum, include);
@@ -99,7 +98,7 @@ public class BoothService {
             List<BoothEntity> boothList = boothRepository.findBoothSearch(
                     clng, clat, nlng-clng, nlat-clat, brandRepository.getBrandEntityByName(keyword).getId());
 
-            List<BoothMapDto> list = MapUtils.convertToBoothMapDto(boothList);
+            List<BoothMapDto> list = convertToBoothMapDto(boothList);
 
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
@@ -110,6 +109,27 @@ public class BoothService {
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         } catch (BaseException e) {
             throw new BaseException(e.getStatus());
+        }
+    }
+
+    public List<BoothMapDto> convertToBoothMapDto(List<BoothEntity> boothList) {
+        return boothList.stream()
+                .map(b -> BoothMapDto.builder()
+                        .id(b.getId())
+                        .brand(b.getBrand().getName())
+                        .coordinate(CoordinateDto.builder()
+                                .lat(b.getLatitude())
+                                .lng(b.getLongitude())
+                                .build())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public Boolean checkFilter(String filter) {
+        if (filter.contains("기타")) {
+            return false;
+        } else {
+            return true;
         }
     }
 
