@@ -14,6 +14,8 @@ public class ReviewUtils {
                         .user(r.getMember().getNickname())
                         .score(r.getStarRate())
                         .content(r.getContent())
+                        .brand(r.getPhotoBooth().getBrand().getName())
+                        .name(r.getPhotoBooth().getName())
                         .userTags(r.getTags().stream()
                                 .map(entity -> entity.getTag().getTag())
                                 .collect(Collectors.toList()))

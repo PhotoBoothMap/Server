@@ -16,6 +16,10 @@ public class ReviewListDto {
 
     private Float score;
 
+    private String brand;
+
+    private String name;
+
     private List<String> imgUrl;
 
     private List<String> userTags;
