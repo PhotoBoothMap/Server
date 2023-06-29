@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.Tuple;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
@@ -52,5 +53,7 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             @Param("height") Double height,
             @Param("brandNum") Long brandNum);
 
+    Optional<BoothEntity> findByIdAndStatus(Long id, String status);
+  
     BoothEntity getById(Long id);
 }

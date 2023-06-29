@@ -12,6 +12,7 @@ public enum ResponseStatus {
     WRONG_LATLNG_RANGE(false, 453, "wrong latitude/longitude range"),
     WRONG_BRAND_NAME(false, 453, "wrong brand name"),
     EMPTY_KEYWORD(false, 453, "empty keyword"),
+    INVALID_BOOTH(false, 453, "invalid booth id"),
 
     // for mypage status
     NO_MEMBER(false, 472, "존재하지 않는 유저입니다."),
