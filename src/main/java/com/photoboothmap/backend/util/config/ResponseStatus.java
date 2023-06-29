@@ -13,6 +13,9 @@ public enum ResponseStatus {
     WRONG_BRAND_NAME(false, 453, "wrong brand name"),
     EMPTY_KEYWORD(false, 453, "empty keyword"),
 
+    // for mypage status
+    NO_MEMBER(false, 472, "존재하지 않는 유저입니다."),
+
 
     // 아래는 false로 들어가는 기본 HttpStatus, deprecated 제외
 
