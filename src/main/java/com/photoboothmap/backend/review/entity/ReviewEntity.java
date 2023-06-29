@@ -12,6 +12,8 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="review")
@@ -43,5 +45,11 @@ public class ReviewEntity extends BaseTimeEntity {
 
     @ColumnDefault("'active'")
     private String status;
+
+    @OneToMany(mappedBy = "review")
+    private List<ImageEntity> imageUrls = new ArrayList<>();
+
+    @OneToMany(mappedBy = "review")
+    private List<TagEntity> tags = new ArrayList<>();
 
 }

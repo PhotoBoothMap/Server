@@ -1,6 +1,7 @@
 package com.photoboothmap.backend.booth.controller;
 
 import com.photoboothmap.backend.booth.service.BoothService;
+import com.photoboothmap.backend.review.service.ReviewService;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class BoothController {
 
     private final BoothService boothService;
+    private final ReviewService reviewService;
 
     @ResponseBody
     @GetMapping("/map")
@@ -62,4 +64,30 @@ public class BoothController {
         }
     }
 
+    @ResponseBody
+    @GetMapping("/booth/{id}/review")
+    public ResponseEntity<BaseResponse> getReviewByBooth(
+            @PathVariable Long id,
+            @RequestParam int count) {
+        try {
+            Map<String, Object> reviewList = reviewService.getReviewByBooth(id, count);
+            return new BaseResponse<>(reviewList).convert();
+        } catch (BaseException ex) {
+            return new BaseResponse<>(ex.getStatus()).convert();
+        }
+    }
+
+
+    @ResponseBody
+    @GetMapping("/booth/{id}")
+    public ResponseEntity<BaseResponse> getBoothDetail(
+            @PathVariable Long id) {
+        try {
+            Map<String, Object> boothDetail = boothService.getBoothDetail(id);
+            return new BaseResponse<>(boothDetail).convert();
+        } catch (BaseException ex) {
+            return new BaseResponse<>(ex.getStatus()).convert();
+        }
+
+    }
 }
