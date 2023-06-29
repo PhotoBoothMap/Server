@@ -54,4 +54,6 @@ public interface BoothRepository extends JpaRepository<BoothEntity, Long> {
             @Param("brandNum") Long brandNum);
 
     Optional<BoothEntity> findByIdAndStatus(Long id, String status);
+  
+    BoothEntity getById(Long id);
 }
