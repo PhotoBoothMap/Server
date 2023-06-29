@@ -77,4 +77,17 @@ public class BoothController {
         }
     }
 
+
+    @ResponseBody
+    @GetMapping("/booth/{id}")
+    public ResponseEntity<BaseResponse> getBoothDetail(
+            @PathVariable Long id) {
+        try {
+            Map<String, Object> boothDetail = boothService.getBoothDetail(id);
+            return new BaseResponse<>(boothDetail).convert();
+        } catch (BaseException ex) {
+            return new BaseResponse<>(ex.getStatus()).convert();
+        }
+
+    }
 }
