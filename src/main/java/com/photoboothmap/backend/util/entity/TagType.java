@@ -1,8 +1,10 @@
 package com.photoboothmap.backend.util.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public enum TagType {
 
     PICTURE("사진","사진이 잘 나와요"),
