@@ -18,5 +18,8 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
             , nativeQuery = true)
     Float averageStarRateByBoothIdx(@Param("boothIdx") Long boothIdx);
 
+    List<ReviewEntity> findByMemberId(Long id);
+  
     List<ReviewEntity> findByPhotoBoothOrderByCreatedAtDesc(BoothEntity booth, Pageable paging);
+
 }

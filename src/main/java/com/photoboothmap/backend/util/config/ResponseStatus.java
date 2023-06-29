@@ -14,6 +14,9 @@ public enum ResponseStatus {
     EMPTY_KEYWORD(false, 453, "empty keyword"),
     INVALID_BOOTH(false, 453, "invalid booth id"),
 
+    // for mypage status
+    NO_MEMBER(false, 472, "존재하지 않는 유저입니다."),
+
 
     // 아래는 false로 들어가는 기본 HttpStatus, deprecated 제외
 
