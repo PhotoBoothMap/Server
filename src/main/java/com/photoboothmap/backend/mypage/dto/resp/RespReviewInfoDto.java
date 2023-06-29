@@ -1,5 +1,6 @@
 package com.photoboothmap.backend.mypage.dto.resp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.photoboothmap.backend.booth.utils.ReviewUtils;
 import com.photoboothmap.backend.util.entity.TagType;
 import lombok.*;
@@ -14,11 +15,13 @@ import java.util.Optional;
 @AllArgsConstructor
 // 개별 리뷰 정보를 담고 있는 DTO
 public class RespReviewInfoDto {
-    private float starRate;
-    private String boothName;
+    private float score;
+    private String brand;
+    private String name;
+    @JsonFormat(pattern="yyyy-MM-dd hh:mm")
     private Timestamp date;
-    private Optional<List<String>> imageUrls;
-    private List<TagType> userTags;
+    private Optional<List<String>> imgUrl;
+    private List<String> userTags;
     private String content;
 
     public void setContent(String content) {
@@ -26,20 +29,22 @@ public class RespReviewInfoDto {
     }
 
     public void setStarRate(Float starRate) {
-        this.starRate = starRate;
+        this.score = starRate;
     }
 
-    public void setBoothName(String boothName) {
-        this.boothName = boothName;
+    public void setName(String boothName) {
+        this.name = boothName;
     }
+
+    public void setBrand(String brand) {this.brand = brand;}
 
     public void setReviewDate(Timestamp date) {
         this.date = date;
     }
 
-    public void setImageUrls(Optional<List<String>> imageUrls) { this.imageUrls = imageUrls; }
+    public void setImageUrls(Optional<List<String>> imageUrls) { this.imgUrl = imageUrls; }
 
     public void setUserTags(List<String> userTags){
-        this.userTags = ReviewUtils.convertStringToTagEnum(userTags);
+        this.userTags = userTags;
     }
 }

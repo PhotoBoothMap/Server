@@ -13,6 +13,7 @@ import com.photoboothmap.backend.review.repository.ReviewRepository;
 import com.photoboothmap.backend.review.repository.TagRepository;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
+import com.photoboothmap.backend.util.entity.TagType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,8 +59,7 @@ public class MypageService {
                     RespReviewInfoDto reviewInfo = new RespReviewInfoDto();
 
                     List<String> tagStrings = tagRepository.findByReview(review).stream()
-                            .map(TagEntity::getTag)
-                            .map(Enum::name)
+                            .map(entity -> TagType.valueOf(entity.getTag().name()).getTag())
                             .collect(Collectors.toList());
 
                     // updateDate 확인
@@ -72,7 +72,8 @@ public class MypageService {
 
                     reviewInfo.setContent(review.getContent());
                     reviewInfo.setStarRate(review.getStarRate());
-                    reviewInfo.setBoothName(booth.getName());
+                    reviewInfo.setBrand(booth.getBrand().getName());
+                    reviewInfo.setName(booth.getName());
                     reviewInfo.setImageUrls(Optional.of(imageUrls));
                     reviewInfo.setUserTags(tagStrings);
 
