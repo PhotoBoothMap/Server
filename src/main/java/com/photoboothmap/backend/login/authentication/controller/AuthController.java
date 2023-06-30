@@ -84,16 +84,26 @@ public class AuthController {
     // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String requestAccessToken) {
-        authService.logout(requestAccessToken);
-        ResponseCookie responseCookie = ResponseCookie.from("refresh-token", "")
-                .maxAge(0)
-                .path("/")
-                .build();
+        try {
+            // RT가 null이 아니면서 empty가 아닌 경우 로그아웃 진행.
+            if (requestAccessToken != null && !requestAccessToken.isEmpty())
+                authService.logout(requestAccessToken);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .build();
+//        authService.logout(requestAccessToken);
+            ResponseCookie responseCookie = ResponseCookie.from("refresh-token", "")
+                    .maxAge(0)
+                    .path("/")
+                    .build();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
+
+            return ResponseEntity.ok().headers(headers).body(new BaseResponse<>("로그아웃 되었습니다."));
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus()).convert();
+        }
+
+
     }
 
 }

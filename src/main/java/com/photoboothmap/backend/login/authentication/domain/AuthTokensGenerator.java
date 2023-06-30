@@ -16,7 +16,6 @@ import java.util.Date;
 public class AuthTokensGenerator {
     private static final String BEARER_TYPE = "Bearer";
 
-    // 추후 application.yml로.
     @Value("${jwt.access-period}")
     private long ATPeriod;
 
@@ -37,10 +36,6 @@ public class AuthTokensGenerator {
 
         Date accessTokenExpiredAt = new Date(now.getTime() + ATPeriod);
         Date refreshTokenExpiredAt = new Date(now.getTime() + RTPeriod);
-
-        log.info("accessTokenExpiredAt: {}", accessTokenExpiredAt);
-        log.info("RTPeriod: {}", RTPeriod);
-        log.info("ATPeriod: {}", ATPeriod);
 
         String subject = memberId.toString();
         String accessToken = jwtTokenProvider.generate(email, subject, accessTokenExpiredAt);

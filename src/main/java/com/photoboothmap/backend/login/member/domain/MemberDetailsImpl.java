@@ -8,7 +8,7 @@ import java.util.Collection;
 
 /*유저의 정보를 가져오는 UserDetails 인터페이스를 상속하는 클래스이다. Authentication을 담고 있다.
         user.getRole().getKey()를 통해 사용자의 권한(Authorities)를 부여해 가져올 수 있다.
-        Principal과 Credential로 사용할 필드를 각각 User.email, User.password로 정해두었다.
+        Principal과 Credential로 사용할 필드를 각각 User.email, User.password로 정해두었다. -> password를 사용하지 않음.
         세부 설정은 현재로써 필요하지 않기 때문에 true로 반환하게만 해두었다.*/
 
 public class MemberDetailsImpl implements UserDetails {

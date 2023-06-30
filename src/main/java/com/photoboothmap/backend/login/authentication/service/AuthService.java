@@ -13,6 +13,8 @@ import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpCookie;
@@ -21,10 +23,11 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import io.jsonwebtoken.*;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -93,8 +96,10 @@ public class AuthService {
 
         String principal = getPrincipal(requestAccessToken);
 
+        // 헤더로부터 RefreshToken 추출
         String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
         String keyInRedis = ("RT(" + SERVER + "):" + principal);
+
         if (refreshTokenInRedis == null) { // Redis에 저장되어 있는 RT가 없을 경우
             return null; // -> 재로그인 요청
         }
@@ -102,6 +107,8 @@ public class AuthService {
         // 요청된 RT의 유효성 검사 & Redis에 저장되어 있는 RT와 같은지 비교
         if(!jwtTokenProvider.validateRefreshToken(requestRefreshToken, keyInRedis) || !refreshTokenInRedis.equals(requestRefreshToken)) {
             redisService.deleteValues("RT(" + SERVER + "):" + principal); // 탈취 가능성 -> 삭제
+            log.info("RT의 탈취 가능성으로 삭제가 진행되었습니다. 다시 로그인해주세요.");
+
             return null; // -> 재로그인 요청
         }
 
@@ -123,6 +130,43 @@ public class AuthService {
 
         saveRefreshToken(SERVER, principal, tokenDto.getRefreshToken());
         return tokenDto;
+    }
+
+    // 로그아웃
+    @Transactional
+    public void logout(String requestAccessTokenInHeader) throws BaseException {
+
+        String requestAccessToken = resolveToken(requestAccessTokenInHeader);
+        String principal = getPrincipal(requestAccessToken);
+
+        log.info("refreshTokenInRedis: {}", requestAccessToken);
+        log.info("principal: {}", principal);
+
+//         JWT 토큰 검증
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//            Long userId = Long.parseLong(authentication.getName());
+;
+        // validate 진행 필요.
+            if (!principal.equals(1)) {
+                throw new BaseException(ResponseStatus.INVALID_AUTH);
+            }
+        } catch (JwtException e) {
+            throw new BaseException(ResponseStatus.INVALID_AUTH);
+        }
+
+        // Redis에 저장되어 있는 RT 삭제
+        String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
+        if (refreshTokenInRedis == null) {
+            throw new BaseException(ResponseStatus.INVALID_AUTH);
+        } else {
+            redisService.deleteValues("RT(" + SERVER + "):" + principal);
+        }
+
+        // Redis에 로그아웃 처리한 AT 저장
+        long expiration = jwtTokenProvider.getTokenExpirationTime(requestAccessToken) - new Date().getTime();
+        redisService.setValuesWithTimeout(requestAccessToken, "logout", expiration);
+
     }
 
     /* -- 그 외 메서드 -- */
@@ -197,22 +241,5 @@ public class AuthService {
         return requestAccessTokenInHeader.substring(7);
     }
 
-    // 로그아웃
-    @Transactional
-    public void logout(String requestAccessTokenInHeader) {
-        String requestAccessToken = resolveToken(requestAccessTokenInHeader);
-        String principal = getPrincipal(requestAccessToken);
 
-        // Redis에 저장되어 있는 RT 삭제
-        String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
-        if (refreshTokenInRedis != null) {
-            redisService.deleteValues("RT(" + SERVER + "):" + principal);
-        }
-
-        // Redis에 로그아웃 처리한 AT 저장
-        long expiration = jwtTokenProvider.getTokenExpirationTime(requestAccessToken) - new Date().getTime();
-        redisService.setValuesWithTimeout(requestAccessToken,
-                "logout",
-                expiration);
-    }
 }
