@@ -7,10 +7,17 @@ import com.photoboothmap.backend.login.authentication.domain.oauth.OAuthLoginPar
 import com.photoboothmap.backend.login.authentication.domain.oauth.RequestOAuthInfoService;
 import com.photoboothmap.backend.login.authentication.infra.jwt.JwtTokenProvider;
 import com.photoboothmap.backend.login.common.redis.RedisService;
+import com.photoboothmap.backend.login.dto.LoginDto;
+import com.photoboothmap.backend.login.dto.RespLoginDto;
 import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
+import com.photoboothmap.backend.util.config.BaseException;
+import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,15 +42,22 @@ public class AuthService {
     private final String SERVER = "Server";
 
     // 로그인: 인증 정보 저장 및 비어 토큰 발급
-    public Map<String, AuthTokens> login(OAuthLoginParams params) {
+    public RespLoginDto login(OAuthLoginParams params) throws BaseException {
+
         OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
-
-        String nickname = findNickName(oAuthInfoResponse);
-        log.info("nickname: {}", nickname);
-
         Long memberId = findOrCreateMember(oAuthInfoResponse);
-//        return authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail());
-        return Map.of(nickname, authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail()));
+        AuthTokens token = createToken(memberId, oAuthInfoResponse);
+
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NO_MEMBER));
+        LoginDto loginDto = getLoginDto(memberId, member);
+
+        HttpHeaders headers = new HttpHeaders();
+        HttpCookie httpCookie = saveHttpCookie(token);
+
+        headers.add(HttpHeaders.SET_COOKIE, httpCookie.toString());
+        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken());
+
+        return new RespLoginDto(headers, loginDto);
     }
 
     // RT를 Redis에 저장
@@ -111,23 +125,43 @@ public class AuthService {
         return tokenDto;
     }
 
-    // 추가 --
+    /* -- 그 외 메서드 -- */
+
+    // 토큰 생성 및 redis 저장
+    public AuthTokens createToken(Long memberId, OAuthInfoResponse oAuthInfoResponse) {
+        AuthTokens token = authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail());
+        return token;
+    }
+
+    // LoginDto GET 및 생성
+    public LoginDto getLoginDto(Long memberId,  Member member) {
+        String nickname = member.getNickname();
+        String profileImageUrl = member.getProfileImageUrl();
+
+        LoginDto loginDto = LoginDto.builder()
+                .nickname(nickname)
+                .profileImageUrl(profileImageUrl)
+                .userId(memberId)
+                .build();
+
+        return loginDto;
+    }
+
+    public HttpCookie saveHttpCookie(AuthTokens token) {
+        // RT 저장
+        HttpCookie httpCookie = ResponseCookie.from("refresh-token", token.getRefreshToken())
+/*                .maxAge(COOKIE_EXPIRATION)
+                .httpOnly(true)
+                .secure(true)*/
+                .build();
+
+        return httpCookie;
+    }
+
     private Long findOrCreateMember(OAuthInfoResponse oAuthInfoResponse) {
         return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
                 .map(Member::getId)
                 .orElseGet(() -> newMember(oAuthInfoResponse));
-    }
-
-    private String findNickName(OAuthInfoResponse oAuthInfoResponse) {
-        return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
-                .map(Member::getNickname)
-                .orElse("default");
-    }
-
-    private String findProfileImage(OAuthInfoResponse oAuthInfoResponse) {
-        return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
-                .map(Member::getProfileImageUrl)
-                .orElse("noImage");
     }
 
     private Long newMember(OAuthInfoResponse oAuthInfoResponse) {
@@ -181,6 +215,4 @@ public class AuthService {
                 "logout",
                 expiration);
     }
-
-
 }

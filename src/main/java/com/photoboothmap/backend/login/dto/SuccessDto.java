@@ -1,4 +1,4 @@
-package com.photoboothmap.backend.login.common.dto;
+package com.photoboothmap.backend.login.dto;
 
 import lombok.Builder;
 import lombok.Getter;
