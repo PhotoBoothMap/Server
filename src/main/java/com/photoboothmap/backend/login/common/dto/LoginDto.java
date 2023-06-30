@@ -9,11 +9,13 @@ import lombok.Getter;
 @Builder
 public class LoginDto {
     private String nickname;
-    private String profile_image_url;
+    private String profileImageUrl;
+    private Long userId;
 
-    public LoginDto(String nickname, String profile_image_url) {
+    public LoginDto(String nickname, String profileImageUrl, Long userId) {
         this.nickname = nickname;
-        this.profile_image_url = profile_image_url;
+        this.profileImageUrl = profileImageUrl;
+        this.userId = userId;
     }
 }
 

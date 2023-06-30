@@ -1,10 +1,8 @@
 package com.photoboothmap.backend.review.entity;
 
 import com.photoboothmap.backend.booth.entity.BoothEntity;
-import com.photoboothmap.backend.user.entity.UserEntity;
+import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.util.entity.BaseTimeEntity;
-import com.photoboothmap.backend.util.entity.LoginType;
-import com.photoboothmap.backend.util.entity.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +12,8 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="review")
@@ -34,10 +34,10 @@ public class ReviewEntity extends BaseTimeEntity {
     private BoothEntity photoBooth;
 
     @ManyToOne
-    @JoinColumn(name = "user")
-    private UserEntity user;
+    @JoinColumn(name = "member")
+    private Member member;
 
-    @Column(nullable = false)
+    @Column
     private String content;
 
     @Column(nullable = false)
@@ -45,5 +45,11 @@ public class ReviewEntity extends BaseTimeEntity {
 
     @ColumnDefault("'active'")
     private String status;
+
+    @OneToMany(mappedBy = "review")
+    private List<ImageEntity> imageUrls = new ArrayList<>();
+
+    @OneToMany(mappedBy = "review")
+    private List<TagEntity> tags = new ArrayList<>();
 
 }
