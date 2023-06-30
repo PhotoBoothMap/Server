@@ -24,17 +24,15 @@ public class AuthController {
     private final AuthService authService;
     private final MemberRepository memberRepository;
 
-    // cookie period: 현재 헤더에서 나타나지 X
-/*    @Value("${jwt.cookie-period}")
-    private final long COOKIE_EXPIRATION;*/
-
     @PostMapping("/kakao")
     public ResponseEntity<BaseResponse> loginKakao(@RequestBody KakaoLoginParams params) {
         try {
             RespLoginDto respLoginDto = authService.login(params);
+
+            HttpHeaders headers = respLoginDto.getHeaders();
             LoginDto loginDto = respLoginDto.getLoginDto();
 
-            return ResponseEntity.ok().body(new BaseResponse<>(loginDto));
+            return ResponseEntity.ok().headers(headers).body(new BaseResponse<>(loginDto));
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus()).convert();
         }
@@ -44,6 +42,7 @@ public class AuthController {
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@CookieValue(name = "refresh-token") String requestRefreshToken,
                                      @RequestHeader("Authorization") String requestAccessToken) {
+
         log.info("requestAccessToken: {} | requestRefreshToken: {}", requestAccessToken, requestRefreshToken);
         AuthTokens.TokenDto reissuedTokenDto = authService.reissue(requestAccessToken, requestRefreshToken);
 
@@ -73,6 +72,7 @@ public class AuthController {
                     .build();
             // success false
             successDto = SuccessDto.builder().success(false).build();
+
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
