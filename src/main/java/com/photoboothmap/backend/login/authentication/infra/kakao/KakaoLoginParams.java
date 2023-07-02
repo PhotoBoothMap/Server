@@ -21,7 +21,6 @@ public class KakaoLoginParams implements OAuthLoginParams {
 
     @Override
     public MultiValueMap<String, String> makeBody() {
-        log.debug("----------------------- debug");
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("code", authorizationCode);
         return body;

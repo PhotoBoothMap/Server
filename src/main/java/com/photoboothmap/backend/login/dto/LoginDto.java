@@ -1,4 +1,4 @@
-package com.photoboothmap.backend.login.common.dto;
+package com.photoboothmap.backend.login.dto;
 
 import com.photoboothmap.backend.login.authentication.domain.AuthTokens;
 import com.photoboothmap.backend.login.member.domain.Member;
@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class LoginDto {
+
     private String nickname;
     private String profileImageUrl;
     private Long userId;

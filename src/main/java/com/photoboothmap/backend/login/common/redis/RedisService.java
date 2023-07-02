@@ -30,8 +30,6 @@ public class RedisService {
 
     // 문제 발생.
     public String getValues(String key){
-        log.info("redis getValues: 키 값 확인 = {}", key);
-        // 키 값 정상이나 안찝힘
         return redisTemplate.opsForValue().get(key);
     }
 

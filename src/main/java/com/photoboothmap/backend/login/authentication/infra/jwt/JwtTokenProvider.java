@@ -48,12 +48,7 @@ JwtTokenProvider {
         Member member = memberRepository.findById(Long.parseLong(subject)).orElse(null);
         if(member != null){
             claims.put("role", member.getRole());
-            log.info("----------------- role: {}", member.getRole());
         }
-/*         claims.put("role", member.getRole());
-         log.info("----------------- role: {}", member.getRole());*/
-
-        log.info("------------subject: {}", subject);
 
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
@@ -97,6 +92,7 @@ JwtTokenProvider {
         return parseClaims(token).getExpiration().getTime();
     }
 
+    // 토큰으로부터 클레임을 만들고, 이를 통해 User 객체를 생성하여 Authentication 객체를 반환 - 이메일로 진행.
     public Authentication getAuthentication(String token) {
         String email = parseClaims(token).get(EMAIL_KEY).toString();
         MemberDetailsImpl userDetailsImpl = memberDetailsService.loadUserByUsername(email);

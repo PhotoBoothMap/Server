@@ -1,20 +1,19 @@
-package com.photoboothmap.backend.login.authentication.application;
+package com.photoboothmap.backend.login.authentication.controller;
 
 import com.photoboothmap.backend.login.authentication.domain.AuthTokens;
 //import com.photoboothmap.backend.login.authentication.infra.google.NaverLoginParams;
 import com.photoboothmap.backend.login.authentication.infra.kakao.KakaoLoginParams;
 import com.photoboothmap.backend.login.authentication.service.AuthService;
-import com.photoboothmap.backend.login.common.dto.LoginDto;
-import com.photoboothmap.backend.login.common.dto.SuccessDto;
-import com.photoboothmap.backend.login.member.domain.Member;
+import com.photoboothmap.backend.login.dto.LoginDto;
+import com.photoboothmap.backend.login.dto.RespLoginDto;
+import com.photoboothmap.backend.login.dto.SuccessDto;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
+import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -25,59 +24,25 @@ public class AuthController {
     private final AuthService authService;
     private final MemberRepository memberRepository;
 
-    // cookie period: 현재 헤더에서 나타나지 X
-/*    @Value("${jwt.cookie-period}")
-    private final long COOKIE_EXPIRATION;*/
-
     @PostMapping("/kakao")
-    public ResponseEntity<BaseResponse<LoginDto>> loginKakao(@RequestBody KakaoLoginParams params) {
-        // User 등록 및 Refresh Token 저장, 닉네임 가져오는 로직 추가.
-        Map<String, AuthTokens> maps = authService.login(params);
+    public ResponseEntity<BaseResponse> loginKakao(@RequestBody KakaoLoginParams params) {
+        try {
+            RespLoginDto respLoginDto = authService.login(params);
 
-        // Map의 key, value 를 통해 토큰과 닉네임을 가져온다.
-        AuthTokens tokens = maps.values().stream().findFirst().orElse(null);
-        String nickname = maps.keySet().stream().findFirst().orElse(null);
+            HttpHeaders headers = respLoginDto.getHeaders();
+            LoginDto loginDto = respLoginDto.getLoginDto();
 
-        Member member = memberRepository.findByNickname(nickname)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
-
-        // 닉네임을 통해 profileImageUrl를 찾아온다.
-        String profileImageUrl = member.getProfileImageUrl();
-        // userId를 가져온다.
-        Long userId = member.getId();
-
-        // RT 저장
-        HttpCookie httpCookie = ResponseCookie.from("refresh-token", tokens.getRefreshToken())
-/*                .maxAge(COOKIE_EXPIRATION)
-                .httpOnly(true)
-                .secure(true)*/
-                .build();
-
-        LoginDto loginDto = LoginDto.builder()
-                .nickname(nickname)
-                .profileImageUrl(profileImageUrl)
-                .userId(userId)
-                .build();
-
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, httpCookie.toString())
-                // AT 저장
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokens.getAccessToken())
-                .body(new BaseResponse<>(loginDto));
-//                .build();
+            return ResponseEntity.ok().headers(headers).body(new BaseResponse<>(loginDto));
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus()).convert();
+        }
     }
-
-    // 추후 구글로 변경. 전체 disable 처리.
-/*    @PostMapping("/naver")
-    public ResponseEntity<AuthTokens> loginNaver(@RequestBody NaverLoginParams params) {
-        return ResponseEntity.ok(authService.login(params));
-    }*/
 
     // 토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(@CookieValue(name = "refresh-token") String requestRefreshToken,
                                      @RequestHeader("Authorization") String requestAccessToken) {
+
         log.info("requestAccessToken: {} | requestRefreshToken: {}", requestAccessToken, requestRefreshToken);
         AuthTokens.TokenDto reissuedTokenDto = authService.reissue(requestAccessToken, requestRefreshToken);
 
@@ -107,6 +72,7 @@ public class AuthController {
                     .build();
             // success false
             successDto = SuccessDto.builder().success(false).build();
+
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
@@ -118,16 +84,26 @@ public class AuthController {
     // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String requestAccessToken) {
-        authService.logout(requestAccessToken);
-        ResponseCookie responseCookie = ResponseCookie.from("refresh-token", "")
-                .maxAge(0)
-                .path("/")
-                .build();
+        try {
+            // RT가 null이 아니면서 empty가 아닌 경우 로그아웃 진행.
+            if (requestAccessToken != null && !requestAccessToken.isEmpty())
+                authService.logout(requestAccessToken);
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .build();
+//        authService.logout(requestAccessToken);
+            ResponseCookie responseCookie = ResponseCookie.from("refresh-token", "")
+                    .maxAge(0)
+                    .path("/")
+                    .build();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, responseCookie.toString());
+
+            return ResponseEntity.ok().headers(headers).body(new BaseResponse<>("로그아웃 되었습니다."));
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus()).convert();
+        }
+
+
     }
 
 }
