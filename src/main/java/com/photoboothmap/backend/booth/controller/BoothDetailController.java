@@ -23,9 +23,9 @@ public class BoothDetailController {
             @RequestBody ReqCreateReviewDto reqCreateReviewDto
     ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = Long.parseLong(authentication.getName());
+        String userEmail = authentication.getName();
         try{
-            this.boothDetailService.postBoothReview(userId, boothId, reqCreateReviewDto);
+            this.boothDetailService.postBoothReview(userEmail, boothId, reqCreateReviewDto);
             return new BaseResponse<>("리뷰를 등록하였습니다.").convert();
         } catch (BaseException ex){
             return new BaseResponse<>(ex.getStatus()).convert();
