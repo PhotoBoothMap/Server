@@ -14,7 +14,7 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     Long countByPhotoBooth_Id(Long boothIdx);
 
-    @Query(value = "select avg(star_rate) from review where photo_booth = :boothIdx"
+    @Query(value = "select round(avg(star_rate),2) from review where photo_booth = :boothIdx"
             , nativeQuery = true)
     Float averageStarRateByBoothIdx(@Param("boothIdx") Long boothIdx);
 

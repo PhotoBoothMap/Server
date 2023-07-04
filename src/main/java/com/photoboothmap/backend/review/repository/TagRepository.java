@@ -24,4 +24,6 @@ public interface TagRepository extends JpaRepository<TagEntity, Long> {
             "limit 3"
     , nativeQuery = true)
     List<Tuple> countTop3TagsByBooth_Id(@Param("boothIdx") Long boothIdx);
+
+    Long countByReview_PhotoBooth_Id(Long boothIdx);
 }
