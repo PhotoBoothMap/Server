@@ -17,8 +17,7 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     @Query(value = "select avg(star_rate) from review where photo_booth = :boothIdx"
             , nativeQuery = true)
     Float averageStarRateByBoothIdx(@Param("boothIdx") Long boothIdx);
-
-    List<ReviewEntity> findByMemberId(Long id);
+    List<ReviewEntity> findByMemberEmail(String email);
   
     List<ReviewEntity> findByPhotoBoothOrderByCreatedAtDesc(BoothEntity booth, Pageable paging);
 
