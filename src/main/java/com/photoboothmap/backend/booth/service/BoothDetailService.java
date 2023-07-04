@@ -40,12 +40,12 @@ public class BoothDetailService {
     private final ImageRepository imageRepository;
 
     public void postBoothReview(
-            Long userId,
+            String userEmail,
             Long boothId,
             ReqCreateReviewDto reqCreateReviewDto
     ) throws BaseException {
         try {
-            Member member = memberRepository.getById(userId);
+            Member member = memberRepository.getByEmail(userEmail);
             BoothEntity booth = boothRepository.getById(boothId);
 
             ReviewEntity newReview = ReviewEntity.builder()
