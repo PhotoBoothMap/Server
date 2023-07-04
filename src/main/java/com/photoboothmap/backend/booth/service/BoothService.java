@@ -161,6 +161,7 @@ public class BoothService {
                     .address(booth.getAddress())
                     .score(reviewRepository.averageStarRateByBoothIdx(booth.getId()))
                     .reviewNum(reviewRepository.countByPhotoBooth_Id(booth.getId()))
+                    .tagNum(tagRepository.countByReview_PhotoBooth_Id(booth.getId()))
                     .build();
 
 
@@ -171,7 +172,7 @@ public class BoothService {
             tags.stream().
                     forEach(tag -> tagCount.put(
                             TagType.valueOf(tag.get("tag", String.class)).getTag(),
-                            tag.get("cnt", BigInteger.class).longValue()*100/reviewNum)
+                            tag.get("cnt", BigInteger.class).longValue())
                     );
 
 
