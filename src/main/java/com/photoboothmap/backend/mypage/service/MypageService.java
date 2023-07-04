@@ -36,13 +36,12 @@ public class MypageService {
     private final ImageRepository imageRepository;
     private final TagRepository tagRepository;
 
-    public RespReviewListDto getReview(Long id) throws BaseException {
+    public RespReviewListDto getReview(String email) throws BaseException {
 
-        Member member = memberRepository.findById(id).orElseThrow(() -> new BaseException(ResponseStatus.NO_MEMBER));
-        Long userId = member.getId();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NO_MEMBER));
+        String userEmail = member.getEmail();
 
-        List<ReviewEntity> userReviews = reviewRepository.findByMemberId(userId);
-
+        List<ReviewEntity> userReviews = reviewRepository.findByMemberEmail(userEmail);
         List<RespReviewInfoDto> reviewInfos = userReviews.stream()
                 .map(review -> {
                     BoothEntity booth = review.getPhotoBooth();
