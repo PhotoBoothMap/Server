@@ -97,13 +97,17 @@ public class BoothDetailService {
 
     public String saveImage(Long boothId, MultipartFile file) throws BaseException {
         try{
+            Path currentPath = Paths.get("");
+            String path = currentPath.toAbsolutePath().toString();
+            log.info("current path {}", path);
+
             String fileExtension = ReviewUtils.getFileExtension(file.getOriginalFilename());
-            String targetDirectoryPath = "image/" + "booth-" + boothId;
+            String targetDirectoryPath = path + "/image/" + "booth-" + boothId;
             File targetDirectory = new File(targetDirectoryPath);
             if(!targetDirectory.exists()){
                 targetDirectory.mkdirs();
             }
-            Path targetDirectoryPathObj = Paths.get("image/" + "booth-" + boothId);
+            Path targetDirectoryPathObj = Paths.get(targetDirectoryPath);
 
             String imageFileName = "image-" + UUID.randomUUID() + fileExtension;
             Files.copy(file.getInputStream(), targetDirectoryPathObj.resolve(imageFileName));
