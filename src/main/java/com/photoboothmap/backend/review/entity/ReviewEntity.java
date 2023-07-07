@@ -52,4 +52,12 @@ public class ReviewEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "review")
     private List<TagEntity> tags = new ArrayList<>();
 
+    public String getContentOrNull() {
+        if (this.content == null) {
+            return null;
+        } else {
+            return this.content;
+        }
+    }
+
 }
