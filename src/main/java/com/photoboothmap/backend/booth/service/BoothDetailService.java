@@ -17,6 +17,7 @@ import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
@@ -39,6 +40,7 @@ public class BoothDetailService {
     private final TagRepository tagRepository;
     private final ImageRepository imageRepository;
 
+    @Transactional(rollbackFor = BaseException.class)
     public void postBoothReview(
             String userEmail,
             Long boothId,
@@ -87,6 +89,9 @@ public class BoothDetailService {
 
         } catch (EntityNotFoundException e){
             throw new BaseException(ResponseStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("{}: Exception {}", this.getClass().getName(), e);
+            throw new BaseException(ResponseStatus.SERVICE_UNAVAILABLE);
         }
     }
 
@@ -102,11 +107,15 @@ public class BoothDetailService {
 
             String imageFileName = "image-" + UUID.randomUUID() + fileExtension;
             Files.copy(file.getInputStream(), targetDirectoryPathObj.resolve(imageFileName));
-            log.info("save image {} {}", imageFileName);
+            log.info("save image {}", imageFileName);
             return targetDirectoryPath + File.separator + imageFileName;
 
         } catch (IOException e){
+            log.error("{}: IO Exception {}", this.getClass().getName(), e);
             throw new BaseException(ResponseStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            log.error("{}: Exception {}", this.getClass().getName(), e);
+            throw new BaseException(ResponseStatus.SERVICE_UNAVAILABLE);
         }
     }
 
