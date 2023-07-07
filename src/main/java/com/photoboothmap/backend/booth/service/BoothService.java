@@ -165,7 +165,6 @@ public class BoothService {
                     .build();
 
 
-            Long reviewNum = boothDetail.getReviewNum();
             List<Tuple> tags = tagRepository.countTop3TagsByBooth_Id(id);
 
             Map<String, Long> tagCount = new LinkedHashMap<>();
