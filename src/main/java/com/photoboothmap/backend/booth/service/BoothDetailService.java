@@ -97,12 +97,8 @@ public class BoothDetailService {
 
     public String saveImage(Long boothId, MultipartFile file) throws BaseException {
         try{
-            Path currentPath = Paths.get("");
-            String path = currentPath.toAbsolutePath().toString();
-            log.info("current path {}", path);
-
             String fileExtension = ReviewUtils.getFileExtension(file.getOriginalFilename());
-            String targetDirectoryPath = path + "/image/" + "booth-" + boothId;
+            String targetDirectoryPath = "/home/ubuntu/app/image/" + "booth-" + boothId;
             File targetDirectory = new File(targetDirectoryPath);
             if(!targetDirectory.exists()){
                 targetDirectory.mkdirs();
