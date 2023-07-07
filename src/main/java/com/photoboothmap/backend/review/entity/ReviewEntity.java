@@ -47,9 +47,9 @@ public class ReviewEntity extends BaseTimeEntity {
     private String status;
 
     @OneToMany(mappedBy = "review")
-    private List<ImageEntity> imageUrls = new ArrayList<>();
+    private List<ImageEntity> imageUrls;
 
     @OneToMany(mappedBy = "review")
-    private List<TagEntity> tags = new ArrayList<>();
+    private List<TagEntity> tags;
 
 }
