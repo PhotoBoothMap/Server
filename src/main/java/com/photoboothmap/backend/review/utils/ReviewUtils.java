@@ -13,7 +13,7 @@ public class ReviewUtils {
                 .map(r -> ReviewListDto.builder()
                         .user(r.getMember().getNickname())
                         .score(r.getStarRate())
-                        .content(r.getContent())
+                        .content(r.getContentOrNull())
                         .brand(r.getPhotoBooth().getBrand().getName())
                         .name(r.getPhotoBooth().getName())
                         .userTags(r.getTags().stream()
