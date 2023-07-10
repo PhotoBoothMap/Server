@@ -17,6 +17,7 @@ import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityNotFoundException;
@@ -39,6 +40,7 @@ public class BoothDetailService {
     private final TagRepository tagRepository;
     private final ImageRepository imageRepository;
 
+    @Transactional(rollbackFor = BaseException.class)
     public void postBoothReview(
             String userEmail,
             Long boothId,
@@ -87,26 +89,33 @@ public class BoothDetailService {
 
         } catch (EntityNotFoundException e){
             throw new BaseException(ResponseStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("{}: Exception {}", this.getClass().getName(), e);
+            throw new BaseException(ResponseStatus.SERVICE_UNAVAILABLE);
         }
     }
 
     public String saveImage(Long boothId, MultipartFile file) throws BaseException {
         try{
             String fileExtension = ReviewUtils.getFileExtension(file.getOriginalFilename());
-            String targetDirectoryPath = "image/" + "booth-" + boothId;
+            String targetDirectoryPath = "/home/ubuntu/app/image/" + "booth-" + boothId;
             File targetDirectory = new File(targetDirectoryPath);
             if(!targetDirectory.exists()){
                 targetDirectory.mkdirs();
             }
-            Path targetDirectoryPathObj = Paths.get("image/" + "booth-" + boothId);
+            Path targetDirectoryPathObj = Paths.get(targetDirectoryPath);
 
             String imageFileName = "image-" + UUID.randomUUID() + fileExtension;
             Files.copy(file.getInputStream(), targetDirectoryPathObj.resolve(imageFileName));
-            log.info("save image {} {}", imageFileName);
+            log.info("save image {}", imageFileName);
             return targetDirectoryPath + File.separator + imageFileName;
 
         } catch (IOException e){
+            log.error("{}: IO Exception {}", this.getClass().getName(), e);
             throw new BaseException(ResponseStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            log.error("{}: Exception {}", this.getClass().getName(), e);
+            throw new BaseException(ResponseStatus.SERVICE_UNAVAILABLE);
         }
     }
 
