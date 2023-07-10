@@ -17,6 +17,7 @@ import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
 import com.photoboothmap.backend.util.entity.TagType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BoothService {
 
     private final BoothRepository boothRepository;
@@ -53,9 +55,11 @@ public class BoothService {
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
             }};
+            log.trace("{} : filter {}, ({} {}), ({} {})", this.getClass(), filter, clng, clat, nlng, nlat);
             return boothMap;
 
         } catch (NullPointerException e) {
+            log.warn("{} : {}", this.getClass().getName(), "wrong brand name");
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         }
     }
@@ -90,11 +94,14 @@ public class BoothService {
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
             }};
+            log.trace("{} : filter {}, count {}, ({} {})", this.getClass(), filter, count, clng, clat);
             return boothMap;
 
         } catch (NullPointerException e) {
+            log.warn("{} : {}", this.getClass().getName(), "wrong brand name");
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         } catch (DataIntegrityViolationException e) {
+            log.warn("{} : {}", this.getClass().getName(), "wrong lat/lng range");
             throw new BaseException(ResponseStatus.WRONG_LATLNG_RANGE);
         }
     }
@@ -113,11 +120,14 @@ public class BoothService {
             Map<String, Object> boothMap = new HashMap<>() {{
                 put("boothList", list);
             }};
+            log.info("{} : keyword {}, ({} {}), ({} {})", this.getClass(), keyword, clng, clat, nlng, nlat);
             return boothMap;
 
         } catch (NullPointerException e) {
+            log.warn("{} : {}", this.getClass().getName(), "wrong brand name");
             throw new BaseException(ResponseStatus.WRONG_BRAND_NAME);
         } catch (BaseException e) {
+            log.warn("{} : {}", this.getClass().getName(), e.getStatus().name());
             throw new BaseException(e.getStatus());
         }
     }
@@ -165,7 +175,6 @@ public class BoothService {
                     .build();
 
 
-            Long reviewNum = boothDetail.getReviewNum();
             List<Tuple> tags = tagRepository.countTop3TagsByBooth_Id(id);
 
             Map<String, Long> tagCount = new LinkedHashMap<>();
@@ -186,9 +195,11 @@ public class BoothService {
                 put("userTags", tagCount);
                 put("review", reviewList);
             }};
+            log.info("{} : booth id {}", this.getClass(), id);
             return res;
 
         } catch (BaseException e) {
+            log.warn("{} : {}", this.getClass().getName(), e.getStatus().name());
             throw new BaseException(e.getStatus());
         }
     }
