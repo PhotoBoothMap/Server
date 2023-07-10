@@ -102,8 +102,11 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("https://photohere.co.kr", "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("*"));
+        configuration.addAllowedHeader("*");
+        configuration.addExposedHeader("*");
+        configuration.addExposedHeader("*");
+//        configuration.setAllowedHeaders(corsConfigData.getAllowedHeaders());
+//        configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         return configuration;
