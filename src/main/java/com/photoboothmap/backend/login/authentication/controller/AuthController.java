@@ -53,8 +53,8 @@ public class AuthController {
 /*                    .maxAge(COOKIE_EXPIRATION)
                     .httpOnly(true)
                     .secure(true)*/
-                    .httpOnly(false)
-                    .secure(false)
+                    .httpOnly(true)
+                    .secure(true)
                     .build();
             // success true
             successDto = SuccessDto.builder().success(true).build();
