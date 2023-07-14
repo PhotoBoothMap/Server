@@ -53,6 +53,7 @@ public class AuthController {
 /*                    .maxAge(COOKIE_EXPIRATION)
                     .httpOnly(true)
                     .secure(true)*/
+                    .sameSite("None")
                     .httpOnly(true)
                     .secure(true)
                     .build();

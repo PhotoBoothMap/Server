@@ -197,6 +197,7 @@ public class AuthService {
 /*                .maxAge(COOKIE_EXPIRATION)
                 .httpOnly(true)
                 .secure(true)*/
+                .sameSite("None")
                 .secure(true)
                 .httpOnly(true)
                 .build();
