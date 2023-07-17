@@ -53,8 +53,10 @@ public class AuthController {
 /*                    .maxAge(COOKIE_EXPIRATION)
                     .httpOnly(true)
                     .secure(true)*/
+                    .domain(".photohere.co.kr")
+                    .path("/")
                     .sameSite("None")
-                    .httpOnly(true)
+                    .httpOnly(false)
                     .secure(true)
                     .build();
             // success true
