@@ -197,10 +197,10 @@ public class AuthService {
 /*                .maxAge(COOKIE_EXPIRATION)
                 .httpOnly(true)
                 .secure(true)*/
-                .domain(".photohere.co.kr")
+//                .domain("photohere.co.kr")
                 .sameSite("None")
                 .secure(true)
-                .httpOnly(false)
+                .httpOnly(true)
                 .build();
 
         return httpCookie;
