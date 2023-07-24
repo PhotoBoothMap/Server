@@ -193,14 +193,14 @@ public class AuthService {
 
     public HttpCookie saveHttpCookie(AuthTokens token) {
         // RT 저장
-        HttpCookie httpCookie = ResponseCookie.from("refresh-token", token.getRefreshToken())
+        HttpCookie httpCookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
 /*                .maxAge(COOKIE_EXPIRATION)
                 .httpOnly(true)
                 .secure(true)*/
-                .domain(".photohere.co.kr")
+//                .domain("photohere.co.kr")
                 .sameSite("None")
                 .secure(true)
-                .httpOnly(false)
+                .httpOnly(true)
                 .build();
 
         return httpCookie;
