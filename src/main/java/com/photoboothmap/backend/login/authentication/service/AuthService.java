@@ -17,6 +17,7 @@ import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -43,6 +44,9 @@ public class AuthService {
     private final RequestOAuthInfoService requestOAuthInfoService;
 
     private final String SERVER = "Server";
+
+    @Value("${jwt.cookie-period}")
+    private long CookiePeriod;
 
     // 로그인: 인증 정보 저장 및 비어 토큰 발급
     public RespLoginDto login(OAuthLoginParams params) throws BaseException {
@@ -194,10 +198,9 @@ public class AuthService {
     public HttpCookie saveHttpCookie(AuthTokens token) {
         // RT 저장
         HttpCookie httpCookie = ResponseCookie.from("refreshToken", token.getRefreshToken())
-/*                .maxAge(COOKIE_EXPIRATION)
-                .httpOnly(true)
-                .secure(true)*/
+                .maxAge(CookiePeriod)
 //                .domain("photohere.co.kr")
+                .path("/")
                 .sameSite("None")
                 .secure(true)
                 .httpOnly(true)

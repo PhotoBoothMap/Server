@@ -12,6 +12,7 @@ import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,9 @@ public class AuthController {
 
     private final AuthService authService;
     private final MemberRepository memberRepository;
+
+    @Value("${jwt.cookie-period}")
+    private long CookiePeriod;
 
     @PostMapping("/kakao")
     public ResponseEntity<BaseResponse> loginKakao(@RequestBody KakaoLoginParams params) {
@@ -43,20 +47,17 @@ public class AuthController {
     public ResponseEntity<?> reissue(@CookieValue(name = "refresh-token") String requestRefreshToken,
                                      @RequestHeader("Authorization") String requestAccessToken) {
 
-        log.info("requestAccessToken: {} | requestRefreshToken: {}", requestAccessToken, requestRefreshToken);
         AuthTokens.TokenDto reissuedTokenDto = authService.reissue(requestAccessToken, requestRefreshToken);
 
         SuccessDto successDto;
         if (reissuedTokenDto != null) { // 토큰 재발급 성공
             // RT 저장
             ResponseCookie responseCookie = ResponseCookie.from("refresh-token", reissuedTokenDto.getRefreshToken())
-/*                    .maxAge(COOKIE_EXPIRATION)
-                    .httpOnly(true)
-                    .secure(true)*/
-                    .domain(".photohere.co.kr")
+                    .maxAge(CookiePeriod)
+//                    .domain(".photohere.co.kr")
                     .path("/")
                     .sameSite("None")
-                    .httpOnly(false)
+                    .httpOnly(true)
                     .secure(true)
                     .build();
             // success true
