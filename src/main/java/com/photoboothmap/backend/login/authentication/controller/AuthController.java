@@ -94,8 +94,6 @@ public class AuthController {
             // RT가 null이 아니면서 empty가 아닌 경우 로그아웃 진행.
             if (requestAccessToken != null && !requestAccessToken.isEmpty())
                 authService.logout(requestAccessToken);
-
-//        authService.logout(requestAccessToken);
             ResponseCookie responseCookie = ResponseCookie.from("refresh-token", "")
                     .maxAge(0)
                     .path("/")

@@ -13,8 +13,6 @@ import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
-import io.jsonwebtoken.Jwt;
-import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +22,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import io.jsonwebtoken.*;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -70,7 +67,6 @@ public class AuthService {
     // RT를 Redis에 저장
     @Transactional
     public void saveRefreshToken(String provider, String principal, String refreshToken) {
-        log.info("------------------- redis 저장");
         redisService.setValuesWithTimeout("RT(" + provider + "):" + principal, // key
                 refreshToken, // value
                 jwtTokenProvider.getTokenExpirationTime(refreshToken)); // timeout(milliseconds)
@@ -140,36 +136,48 @@ public class AuthService {
     @Transactional
     public void logout(String requestAccessTokenInHeader) throws BaseException {
 
-        String requestAccessToken = resolveToken(requestAccessTokenInHeader);
-        String principal = getPrincipal(requestAccessToken);
+        try {
+            String requestAccessToken = resolveToken(requestAccessTokenInHeader);
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String principal = getPrincipal(requestAccessToken);
 
-        log.info("refreshTokenInRedis: {}", requestAccessToken);
-        log.info("principal: {}", principal);
+            log.info("AT input: {}", requestAccessToken);
+            log.info("principal: {}", principal);
+
+            // Redis에 저장되어 있는 RT 삭제
+            String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
+            log.info("refreshTokenInRedis = {}", refreshTokenInRedis);
+            if (refreshTokenInRedis == null) {
+                throw new BaseException(ResponseStatus.INVALID_AUTH);
+            } else {
+                redisService.deleteValues("RT(" + SERVER + "):" + principal);
+            }
+
+            // Redis에 로그아웃 처리한 AT 저장
+            long expiration = jwtTokenProvider.getTokenExpirationTime(requestAccessToken) - new Date().getTime();
+            redisService.setValuesWithTimeout(requestAccessToken, "logout", expiration);
+
+        } catch (IllegalArgumentException e) {
+            throw new BaseException(ResponseStatus.INVALID_TOKEN);
+        } catch (BaseException e) {
+            throw new BaseException(ResponseStatus.INVALID_AUTH);
+        }
 
 //         JWT 토큰 검증
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        try {
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //            Long userId = Long.parseLong(authentication.getName());
-;
-        // validate 진행 필요.
-            if (!principal.equals(1)) {
-                throw new BaseException(ResponseStatus.INVALID_AUTH);
-            }
-        } catch (JwtException e) {
-            throw new BaseException(ResponseStatus.INVALID_AUTH);
-        }
+//            log.info("authentication = {}", authentication);
+//            log.info("userId = {}", userId);
+//
+//        // validate 진행 필요.
+//            if (!principal.equals(1)) {
+//                throw new BaseException(ResponseStatus.INVALID_AUTH);
+//            }
+//        } catch (JwtException e) {
+//            throw new BaseException(ResponseStatus.INVALID_AUTH);
+//        }
 
-        // Redis에 저장되어 있는 RT 삭제
-        String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
-        if (refreshTokenInRedis == null) {
-            throw new BaseException(ResponseStatus.INVALID_AUTH);
-        } else {
-            redisService.deleteValues("RT(" + SERVER + "):" + principal);
-        }
-
-        // Redis에 로그아웃 처리한 AT 저장
-        long expiration = jwtTokenProvider.getTokenExpirationTime(requestAccessToken) - new Date().getTime();
-        redisService.setValuesWithTimeout(requestAccessToken, "logout", expiration);
 
     }
 
@@ -245,8 +253,11 @@ public class AuthService {
             log.info("에러 발생!");
             throw new IllegalArgumentException("Invalid token in Authorization header");
         }
-        return requestAccessTokenInHeader.substring(7);
+        String token = requestAccessTokenInHeader.substring(7);
+
+        if (token.length() != 203)
+            throw new IllegalArgumentException("Invalid token in Authorization header");
+
+        return token;
     }
-
-
 }
