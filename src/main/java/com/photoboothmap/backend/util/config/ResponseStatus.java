@@ -16,7 +16,8 @@ public enum ResponseStatus {
 
     // for mypage status
     NO_MEMBER(false, 472, "존재하지 않는 유저입니다."),
-    INVALID_AUTH(false, 473, "잘못된 Authorization 입니다."),
+    INVALID_TOKEN(false, 473, "Authorization header에 잘못된 토큰을 입력하였습니다."),
+    INVALID_AUTH(false, 474, "잘못된 Authorization 입니다."),
 
 
     // 아래는 false로 들어가는 기본 HttpStatus, deprecated 제외
