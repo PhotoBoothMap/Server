@@ -1,6 +1,7 @@
 package com.photoboothmap.backend.booth.service;
 
 import com.photoboothmap.backend.booth.dto.reviewDto.ReqCreateReviewDto;
+import com.photoboothmap.backend.booth.dto.reviewDto.SaveImageRes;
 import com.photoboothmap.backend.booth.entity.BoothEntity;
 import com.photoboothmap.backend.booth.repository.BoothRepository;
 import com.photoboothmap.backend.booth.utils.ReviewUtils;
@@ -16,6 +17,7 @@ import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -68,12 +70,6 @@ public class BoothDetailService {
 
             tagRepository.saveAll(tagEntityList);
 
-            /**
-             * reqCreateReviewDto.getImageUrls()이 not null 인 경우에만 하고 싶은데 좋은 방법을 모르겠어요!
-             * 리뷰 남겨주시면 감사드리겠습니다
-             */
-
-
             if (!reqCreateReviewDto.getImageUrls().isEmpty()){
                 List<String> imageUrlList = reqCreateReviewDto.getImageUrls().get();
                 List<ImageEntity> imageEntityList = imageUrlList.stream()
@@ -95,7 +91,7 @@ public class BoothDetailService {
         }
     }
 
-    public String saveImage(Long boothId, MultipartFile file) throws BaseException {
+    public SaveImageRes saveImage(Long boothId, MultipartFile file) throws BaseException {
         try{
             String fileExtension = ReviewUtils.getFileExtension(file.getOriginalFilename());
             String targetDirectoryPath = "/home/ubuntu/app/image/" + "booth-" + boothId;
@@ -107,8 +103,14 @@ public class BoothDetailService {
 
             String imageFileName = "image-" + UUID.randomUUID() + fileExtension;
             Files.copy(file.getInputStream(), targetDirectoryPathObj.resolve(imageFileName));
+            String newTempFilePath = targetDirectoryPath + File.separator + imageFileName;
+
             log.info("save image {}", imageFileName);
-            return targetDirectoryPath + File.separator + imageFileName;
+
+            return SaveImageRes.builder()
+                    .imageUrl(newTempFilePath)
+                    .imageFile(IOUtils.toByteArray(file.getInputStream()))
+                    .build();
 
         } catch (IOException e){
             log.error("{}: IO Exception {}", this.getClass().getName(), e);
