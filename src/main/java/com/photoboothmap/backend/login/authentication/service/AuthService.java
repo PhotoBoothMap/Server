@@ -207,9 +207,8 @@ public class AuthService {
         // RT 저장
         HttpCookie httpCookie = ResponseCookie.from("refresh-token", token.getRefreshToken())
                 .maxAge(CookiePeriod)
-                .domain("photohere.co.kr")
+                .domain("api.photohere.co.kr")
                 .path("/")
-                .sameSite("None")
                 .secure(true)
                 .httpOnly(true)
                 .build();
