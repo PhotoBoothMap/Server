@@ -56,7 +56,7 @@ public class AuthService {
         LoginDto loginDto = getLoginDto(memberId, member);
 
         HttpHeaders headers = new HttpHeaders();
-        HttpCookie httpCookie = saveHttpCookie(token);
+        ResponseCookie httpCookie = saveHttpCookie(token);
 
         headers.add(HttpHeaders.SET_COOKIE, httpCookie.toString());
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken());
@@ -203,9 +203,9 @@ public class AuthService {
         return loginDto;
     }
 
-    public HttpCookie saveHttpCookie(AuthTokens token) {
+    public ResponseCookie saveHttpCookie(AuthTokens token) {
         // RT 저장
-        HttpCookie httpCookie = ResponseCookie.from("refresh-token", token.getRefreshToken())
+        ResponseCookie httpCookie = ResponseCookie.from("refresh-token", token.getRefreshToken())
                 .maxAge(CookiePeriod)
                 .domain("api.photohere.co.kr")
                 .path("/")
