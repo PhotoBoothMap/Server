@@ -59,6 +59,7 @@ public class AuthService {
         ResponseCookie httpCookie = saveHttpCookie(token);
 
         headers.add(HttpHeaders.SET_COOKIE, httpCookie.toString());
+        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache");
         headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken());
 
         return new RespLoginDto(headers, loginDto);
