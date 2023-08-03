@@ -53,7 +53,7 @@ public class AuthService {
         AuthTokens token = createToken(memberId, oAuthInfoResponse);
 
         Member member = memberRepository.findById(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NO_MEMBER));
-        LoginDto loginDto = getLoginDto(memberId, member);
+        LoginDto loginDto = getLoginDto(memberId, member, token);
 
         HttpHeaders headers = new HttpHeaders();
         HttpCookie httpCookie = saveHttpCookie(token);
@@ -190,14 +190,16 @@ public class AuthService {
     }
 
     // LoginDto GET 및 생성
-    public LoginDto getLoginDto(Long memberId,  Member member) {
+    public LoginDto getLoginDto(Long memberId,  Member member, AuthTokens token) {
         String nickname = member.getNickname();
         String profileImageUrl = member.getProfileImageUrl();
+        String AccessToken = token.getAccessToken();
 
         LoginDto loginDto = LoginDto.builder()
                 .nickname(nickname)
                 .profileImageUrl(profileImageUrl)
                 .userId(memberId)
+                .accessToken(AccessToken)
                 .build();
 
         return loginDto;
