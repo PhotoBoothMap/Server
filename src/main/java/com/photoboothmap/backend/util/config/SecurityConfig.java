@@ -105,8 +105,6 @@ public class SecurityConfig {
         configuration.addAllowedHeader("*");
         configuration.addExposedHeader("*");
         configuration.addExposedHeader("*");
-//        configuration.setAllowedHeaders(corsConfigData.getAllowedHeaders());
-//        configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         return configuration;
