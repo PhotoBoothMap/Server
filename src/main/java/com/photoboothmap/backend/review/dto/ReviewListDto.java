@@ -20,7 +20,7 @@ public class ReviewListDto {
 
     private String name;
 
-    private List<String> imgUrl;
+    private List<byte[]> imgFile;
 
     private List<String> userTags;
 
