@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -77,8 +78,10 @@ public class SecurityConfig {
 
                 .and()
                 .authorizeRequests() // '인증'이 필요하다
-                .antMatchers("/api/mypage/**").authenticated() // 마이페이지 인증 필요
-                .antMatchers("/api/admin/**").hasRole("ADMIN") // 관리자 페이지
+                .antMatchers("/mypage/**").authenticated() // 마이페이지 인증 필요
+                .antMatchers(HttpMethod.POST, "/booth/**/review").authenticated() // 리뷰 쓰기 인증 필요
+                .antMatchers("/booth/**/image").authenticated() // 이미지 추가하기 인증 필요
+                .antMatchers("/admin/**").hasRole("ADMIN") // 관리자 페이지
                 .anyRequest().permitAll()
 
                 .and()
@@ -99,8 +102,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("https://photohere.co.kr", "http://localhost:3000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("*"));
+        configuration.addAllowedHeader("*");
+        configuration.addExposedHeader("*");
+        configuration.addExposedHeader("*");
         configuration.setAllowCredentials(true);
 
         return configuration;

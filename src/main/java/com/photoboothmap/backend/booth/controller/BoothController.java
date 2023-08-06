@@ -5,6 +5,9 @@ import com.photoboothmap.backend.review.service.ReviewService;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.BaseResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -84,6 +87,22 @@ public class BoothController {
             @PathVariable Long id) {
         try {
             Map<String, Object> boothDetail = boothService.getBoothDetail(id);
+
+            if (id == 2057) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.set("Content-Type", "application/json; charset=UTF-8");
+
+                HttpCookie httpCookie = ResponseCookie.from("cookie-test", "asdf")
+                        .domain(".photohere.co.kr")
+                        .sameSite("None")
+                        .secure(true)
+                        .httpOnly(true)
+                        .build();
+
+                headers.add(HttpHeaders.SET_COOKIE, httpCookie.toString());
+
+                return ResponseEntity.status(200).headers(headers).body(new BaseResponse<>(boothDetail));
+            }
             return new BaseResponse<>(boothDetail).convert();
         } catch (BaseException ex) {
             return new BaseResponse<>(ex.getStatus()).convert();

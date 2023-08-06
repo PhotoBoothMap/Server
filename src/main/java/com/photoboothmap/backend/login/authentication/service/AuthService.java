@@ -7,17 +7,25 @@ import com.photoboothmap.backend.login.authentication.domain.oauth.OAuthLoginPar
 import com.photoboothmap.backend.login.authentication.domain.oauth.RequestOAuthInfoService;
 import com.photoboothmap.backend.login.authentication.infra.jwt.JwtTokenProvider;
 import com.photoboothmap.backend.login.common.redis.RedisService;
+import com.photoboothmap.backend.login.dto.LoginDto;
+import com.photoboothmap.backend.login.dto.RespLoginDto;
 import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
+import com.photoboothmap.backend.util.config.BaseException;
+import com.photoboothmap.backend.util.config.ResponseStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,22 +42,32 @@ public class AuthService {
 
     private final String SERVER = "Server";
 
+    @Value("${jwt.cookie-period}")
+    private long CookiePeriod;
+
     // 로그인: 인증 정보 저장 및 비어 토큰 발급
-    public Map<String, AuthTokens> login(OAuthLoginParams params) {
+    public RespLoginDto login(OAuthLoginParams params) throws BaseException {
+
         OAuthInfoResponse oAuthInfoResponse = requestOAuthInfoService.request(params);
-
-        String nickname = findNickName(oAuthInfoResponse);
-        log.info("nickname: {}", nickname);
-
         Long memberId = findOrCreateMember(oAuthInfoResponse);
-//        return authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail());
-        return Map.of(nickname, authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail()));
+        AuthTokens token = createToken(memberId, oAuthInfoResponse);
+
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NO_MEMBER));
+        LoginDto loginDto = getLoginDto(memberId, member, token);
+
+        HttpHeaders headers = new HttpHeaders();
+        ResponseCookie httpCookie = saveHttpCookie(token);
+
+        headers.add(HttpHeaders.SET_COOKIE, httpCookie.toString());
+        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache");
+        headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + token.getAccessToken());
+
+        return new RespLoginDto(headers, loginDto);
     }
 
     // RT를 Redis에 저장
     @Transactional
     public void saveRefreshToken(String provider, String principal, String refreshToken) {
-        log.info("------------------- redis 저장");
         redisService.setValuesWithTimeout("RT(" + provider + "):" + principal, // key
                 refreshToken, // value
                 jwtTokenProvider.getTokenExpirationTime(refreshToken)); // timeout(milliseconds)
@@ -79,8 +97,10 @@ public class AuthService {
 
         String principal = getPrincipal(requestAccessToken);
 
+        // 헤더로부터 RefreshToken 추출
         String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
         String keyInRedis = ("RT(" + SERVER + "):" + principal);
+
         if (refreshTokenInRedis == null) { // Redis에 저장되어 있는 RT가 없을 경우
             return null; // -> 재로그인 요청
         }
@@ -88,6 +108,8 @@ public class AuthService {
         // 요청된 RT의 유효성 검사 & Redis에 저장되어 있는 RT와 같은지 비교
         if(!jwtTokenProvider.validateRefreshToken(requestRefreshToken, keyInRedis) || !refreshTokenInRedis.equals(requestRefreshToken)) {
             redisService.deleteValues("RT(" + SERVER + "):" + principal); // 탈취 가능성 -> 삭제
+            log.info("RT의 탈취 가능성으로 삭제가 진행되었습니다. 다시 로그인해주세요.");
+
             return null; // -> 재로그인 요청
         }
 
@@ -111,23 +133,96 @@ public class AuthService {
         return tokenDto;
     }
 
-    // 추가 --
+    // 로그아웃
+    @Transactional
+    public void logout(String requestAccessTokenInHeader) throws BaseException {
+
+        try {
+            String requestAccessToken = resolveToken(requestAccessTokenInHeader);
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String principal = getPrincipal(requestAccessToken);
+
+            log.info("AT input: {}", requestAccessToken);
+            log.info("principal: {}", principal);
+
+            // Redis에 저장되어 있는 RT 삭제
+            String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
+            log.info("refreshTokenInRedis = {}", refreshTokenInRedis);
+            if (refreshTokenInRedis == null) {
+                throw new BaseException(ResponseStatus.INVALID_AUTH);
+            } else {
+                redisService.deleteValues("RT(" + SERVER + "):" + principal);
+            }
+
+            // Redis에 로그아웃 처리한 AT 저장
+            long expiration = jwtTokenProvider.getTokenExpirationTime(requestAccessToken) - new Date().getTime();
+            redisService.setValuesWithTimeout(requestAccessToken, "logout", expiration);
+
+        } catch (IllegalArgumentException e) {
+            throw new BaseException(ResponseStatus.INVALID_TOKEN);
+        } catch (BaseException e) {
+            throw new BaseException(ResponseStatus.INVALID_AUTH);
+        }
+
+//         JWT 토큰 검증
+//        try {
+//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//            Long userId = Long.parseLong(authentication.getName());
+//            log.info("authentication = {}", authentication);
+//            log.info("userId = {}", userId);
+//
+//        // validate 진행 필요.
+//            if (!principal.equals(1)) {
+//                throw new BaseException(ResponseStatus.INVALID_AUTH);
+//            }
+//        } catch (JwtException e) {
+//            throw new BaseException(ResponseStatus.INVALID_AUTH);
+//        }
+
+
+    }
+
+    /* -- 그 외 메서드 -- */
+
+    // 토큰 생성 및 redis 저장
+    public AuthTokens createToken(Long memberId, OAuthInfoResponse oAuthInfoResponse) {
+        AuthTokens token = authTokensGenerator.generate(SERVER, memberId, oAuthInfoResponse.getEmail());
+        return token;
+    }
+
+    // LoginDto GET 및 생성
+    public LoginDto getLoginDto(Long memberId,  Member member, AuthTokens token) {
+        String nickname = member.getNickname();
+        String profileImageUrl = member.getProfileImageUrl();
+        String AccessToken = token.getAccessToken();
+
+        LoginDto loginDto = LoginDto.builder()
+                .nickname(nickname)
+                .profileImageUrl(profileImageUrl)
+                .userId(memberId)
+                .accessToken(AccessToken)
+                .build();
+
+        return loginDto;
+    }
+
+    public ResponseCookie saveHttpCookie(AuthTokens token) {
+        // RT 저장
+        ResponseCookie httpCookie = ResponseCookie.from("refresh-token", token.getRefreshToken())
+                .maxAge(CookiePeriod)
+                .domain("api.photohere.co.kr")
+                .path("/")
+                .secure(true)
+                .httpOnly(true)
+                .build();
+
+        return httpCookie;
+    }
+
     private Long findOrCreateMember(OAuthInfoResponse oAuthInfoResponse) {
         return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
                 .map(Member::getId)
                 .orElseGet(() -> newMember(oAuthInfoResponse));
-    }
-
-    private String findNickName(OAuthInfoResponse oAuthInfoResponse) {
-        return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
-                .map(Member::getNickname)
-                .orElse("default");
-    }
-
-    private String findProfileImage(OAuthInfoResponse oAuthInfoResponse) {
-        return memberRepository.findByEmail(oAuthInfoResponse.getEmail())
-                .map(Member::getProfileImageUrl)
-                .orElse("noImage");
     }
 
     private Long newMember(OAuthInfoResponse oAuthInfoResponse) {
@@ -160,27 +255,11 @@ public class AuthService {
             log.info("에러 발생!");
             throw new IllegalArgumentException("Invalid token in Authorization header");
         }
-        return requestAccessTokenInHeader.substring(7);
+        String token = requestAccessTokenInHeader.substring(7);
+
+        if (token.length() != 203)
+            throw new IllegalArgumentException("Invalid token in Authorization header");
+
+        return token;
     }
-
-    // 로그아웃
-    @Transactional
-    public void logout(String requestAccessTokenInHeader) {
-        String requestAccessToken = resolveToken(requestAccessTokenInHeader);
-        String principal = getPrincipal(requestAccessToken);
-
-        // Redis에 저장되어 있는 RT 삭제
-        String refreshTokenInRedis = redisService.getValues("RT(" + SERVER + "):" + principal);
-        if (refreshTokenInRedis != null) {
-            redisService.deleteValues("RT(" + SERVER + "):" + principal);
-        }
-
-        // Redis에 로그아웃 처리한 AT 저장
-        long expiration = jwtTokenProvider.getTokenExpirationTime(requestAccessToken) - new Date().getTime();
-        redisService.setValuesWithTimeout(requestAccessToken,
-                "logout",
-                expiration);
-    }
-
-
 }

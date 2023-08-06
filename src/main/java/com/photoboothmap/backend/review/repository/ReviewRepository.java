@@ -14,11 +14,10 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     Long countByPhotoBooth_Id(Long boothIdx);
 
-    @Query(value = "select avg(star_rate) from review where photo_booth = :boothIdx"
+    @Query(value = "select COALESCE(round(avg(star_rate), 1), 0) from review where photo_booth = :boothIdx"
             , nativeQuery = true)
     Float averageStarRateByBoothIdx(@Param("boothIdx") Long boothIdx);
-
-    List<ReviewEntity> findByMemberId(Long id);
+    List<ReviewEntity> findByMemberEmail(String email);
   
     List<ReviewEntity> findByPhotoBoothOrderByCreatedAtDesc(BoothEntity booth, Pageable paging);
 

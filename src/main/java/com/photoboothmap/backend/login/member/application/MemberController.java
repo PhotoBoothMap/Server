@@ -2,7 +2,7 @@ package com.photoboothmap.backend.login.member.application;
 
 import com.photoboothmap.backend.login.authentication.domain.AuthTokensGenerator;
 import com.photoboothmap.backend.login.authentication.service.AuthService;
-import com.photoboothmap.backend.login.common.dto.SuccessDto;
+import com.photoboothmap.backend.login.dto.SuccessDto;
 import com.photoboothmap.backend.login.member.domain.Member;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
 import com.photoboothmap.backend.util.config.BaseResponse;
@@ -30,7 +30,7 @@ public class MemberController {
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<SuccessDto> findByAccessToken(@RequestHeader("Authorization") String requestAccessToken) {
+    public ResponseEntity<SuccessDto> validate(@RequestHeader("Authorization") String requestAccessToken) {
         SuccessDto successDto;
 
         if (!authService.isValidateRequired(requestAccessToken)) {

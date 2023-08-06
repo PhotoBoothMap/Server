@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
@@ -32,12 +33,12 @@ public class MypageController {
 
     @GetMapping("/mypage")
     public ResponseEntity<BaseResponse> getUser() {
-        try {
-            // 유저 정보 조회
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            Long userId = Long.parseLong(authentication.getName());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
 
-            RespReviewListDto reviewDto = mypageService.getReview(userId);
+        try {
+            RespReviewListDto reviewDto = mypageService.getReview(userEmail);
+
             List<RespReviewListDto> infoList = new ArrayList<>();
             infoList.add(reviewDto);
 
