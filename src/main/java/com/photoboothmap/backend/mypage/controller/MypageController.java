@@ -39,10 +39,7 @@ public class MypageController {
         try {
             RespReviewListDto reviewDto = mypageService.getReview(userEmail);
 
-            List<RespReviewListDto> infoList = new ArrayList<>();
-            infoList.add(reviewDto);
-
-            return new BaseResponse<>(infoList).convert();
+            return new BaseResponse<>(reviewDto).convert();
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus()).convert();
         }
