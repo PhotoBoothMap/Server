@@ -3,6 +3,9 @@ package com.photoboothmap.backend.review.utils;
 import com.photoboothmap.backend.review.dto.ReviewListDto;
 import com.photoboothmap.backend.review.entity.ReviewEntity;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,8 +22,8 @@ public class ReviewUtils {
                         .userTags(r.getTags().stream()
                                 .map(entity -> entity.getTag().getTag())
                                 .collect(Collectors.toList()))
-                        .imgUrl(r.getImageUrls().stream()
-                                .map(entity -> entity.getImgUrl())
+                        .imgFile(r.getImageUrls().stream()
+                                .map(entity -> ImageUtils.convertUrlToBinary(entity.getImgUrl()))
                                 .collect(Collectors.toList()))
                         .date(r.getCreatedAt())
                         .build())
