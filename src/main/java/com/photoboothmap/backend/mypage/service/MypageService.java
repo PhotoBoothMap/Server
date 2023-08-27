@@ -65,9 +65,9 @@ public class MypageService {
                     // updateDate 확인
                     Timestamp updatedDate = Timestamp.valueOf(review.getUpdatedAt());
                     if (updatedDate == null) {
-                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getCreatedAt()));
+                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getCreatedAt().plusHours(9)));
                     } else {
-                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getUpdatedAt()));
+                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getUpdatedAt().plusHours(9)));
                     }
 
                     reviewInfo.setContent(review.getContent());

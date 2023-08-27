@@ -24,6 +24,6 @@ public class ReviewListDto {
 
     private List<String> userTags;
 
-    @JsonFormat(pattern="yyyy-MM-dd hh:mm")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime date;
 }

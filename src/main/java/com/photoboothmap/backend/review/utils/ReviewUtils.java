@@ -25,7 +25,7 @@ public class ReviewUtils {
                         .imgFile(r.getImageUrls().stream()
                                 .map(entity -> ImageUtils.convertUrlToBinary(entity.getImgUrl()))
                                 .collect(Collectors.toList()))
-                        .date(r.getCreatedAt())
+                        .date(r.getCreatedAt().plusHours(9))
                         .build())
                 .collect(Collectors.toList());
     }
