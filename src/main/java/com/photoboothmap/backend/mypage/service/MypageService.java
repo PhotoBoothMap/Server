@@ -11,6 +11,7 @@ import com.photoboothmap.backend.review.entity.TagEntity;
 import com.photoboothmap.backend.review.repository.ImageRepository;
 import com.photoboothmap.backend.review.repository.ReviewRepository;
 import com.photoboothmap.backend.review.repository.TagRepository;
+import com.photoboothmap.backend.review.utils.ImageUtils;
 import com.photoboothmap.backend.util.config.BaseException;
 import com.photoboothmap.backend.util.config.ResponseStatus;
 import com.photoboothmap.backend.util.entity.TagType;
@@ -47,11 +48,11 @@ public class MypageService {
                     BoothEntity booth = review.getPhotoBooth();
 
                     List<ImageEntity> images = imageRepository.findByReviewWithJoin(review);
-                    List<String> imageUrls = new ArrayList<>();
+                    List<byte[]> imgFile = new ArrayList<>();
 
                     if (images != null && !images.isEmpty()) {
-                        imageUrls = images.stream()
-                                .map(ImageEntity::getImgUrl)
+                        imgFile = images.stream()
+                                .map(entity -> ImageUtils.convertUrlToBinary(entity.getImgUrl()))
                                 .collect(Collectors.toList());
                     }
 
@@ -64,16 +65,16 @@ public class MypageService {
                     // updateDate 확인
                     Timestamp updatedDate = Timestamp.valueOf(review.getUpdatedAt());
                     if (updatedDate == null) {
-                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getCreatedAt()));
+                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getCreatedAt().plusHours(9)));
                     } else {
-                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getUpdatedAt()));
+                        reviewInfo.setReviewDate(Timestamp.valueOf(review.getUpdatedAt().plusHours(9)));
                     }
 
                     reviewInfo.setContent(review.getContent());
                     reviewInfo.setStarRate(review.getStarRate());
                     reviewInfo.setBrand(booth.getBrand().getName());
                     reviewInfo.setName(booth.getName());
-                    reviewInfo.setImageUrls(Optional.of(imageUrls));
+                    reviewInfo.setImgFile(Optional.of(imgFile));
                     reviewInfo.setUserTags(tagStrings);
 
                     return reviewInfo;

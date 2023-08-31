@@ -18,9 +18,9 @@ public class RespReviewInfoDto {
     private float score;
     private String brand;
     private String name;
-    @JsonFormat(pattern="yyyy-MM-dd hh:mm")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private Timestamp date;
-    private Optional<List<String>> imgUrl;
+    private Optional<List<byte[]>> imgFile;
     private List<String> userTags;
     private String content;
 
@@ -42,7 +42,7 @@ public class RespReviewInfoDto {
         this.date = date;
     }
 
-    public void setImageUrls(Optional<List<String>> imageUrls) { this.imgUrl = imageUrls; }
+    public void setImgFile(Optional<List<byte[]>> imgFile) {this.imgFile = imgFile;}
 
     public void setUserTags(List<String> userTags){
         this.userTags = userTags;
