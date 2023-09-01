@@ -41,4 +41,19 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(successDto); // 재발급 필요
         }
     }
+
+    @GetMapping("/validateRT")
+    public ResponseEntity<SuccessDto> validateRT(@RequestHeader("refresh-token") String requestRefreshToken) {
+        SuccessDto successDto;
+        authService.isValidateRequired(requestRefreshToken);
+//        log.info("requestRefreshToken = {}", requestRefreshToken);
+
+        if (!authService.isValidateRequired(requestRefreshToken)) {
+            successDto = SuccessDto.builder().success(true).build();
+            return ResponseEntity.status(HttpStatus.OK).body(successDto); // 재발급 필요X
+        } else {
+            successDto = SuccessDto.builder().success(false).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(successDto); // 재발급 필요
+        }
+    }
 }

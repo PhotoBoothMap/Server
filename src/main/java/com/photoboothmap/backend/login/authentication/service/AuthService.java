@@ -74,10 +74,12 @@ public class AuthService {
     }
 
     // AT가 만료일자만 초과한 유효한 토큰인지 검사 - true일 경우 재발급이 필요.
-    public boolean isValidateRequired(String requestAccessTokenInHeader) {
-        String requestAccessToken = resolveToken(requestAccessTokenInHeader);
+    public boolean isValidateRequired(String requestRefreshTokenInHeader) {
+        String requestAccessToken = resolveTokenRT(requestRefreshTokenInHeader);
+//        log.info("requestAccessToken = {}", requestAccessToken);
         try {
             Long memberId = authTokensGenerator.extractMemberId(requestAccessToken);
+//            log.info("memberId = {}", memberId);
             if (!memberRepository.existsById(memberId)) {
                 return true;
             }
@@ -87,7 +89,7 @@ public class AuthService {
         return jwtTokenProvider.validateAccessTokenOnlyExpired(requestAccessToken); // true = 재발급
     }
 
-    // 토큰 재발급: validate 메서드가 true 반환할 때만 사용 -> AT, RT 재발급 : 확인 필요.
+    // 토큰 재발급: validate 메서드가 true 반환할 때만 사용 -> AT 제거
     @Transactional
     public AuthTokens.TokenDto reissue(String requestAccessTokenInHeader, String requestRefreshToken) {
         String requestAccessToken = resolveToken(requestAccessTokenInHeader);
@@ -262,4 +264,20 @@ public class AuthService {
 
         return token;
     }
+
+    public String resolveTokenRT(String requestAccessTokenInHeader) {
+        if (requestAccessTokenInHeader == null || !requestAccessTokenInHeader.startsWith("refresh-token=")) {
+//            log.info("에러 발생!");
+            throw new IllegalArgumentException("Invalid token in Authorization header");
+        }
+
+        String tokenWithParams = requestAccessTokenInHeader.substring(14);
+//        log.info("tokenWithParams = {}", tokenWithParams);
+        int semicolonIndex = tokenWithParams.indexOf(";");
+//        log.info("semicolonIndex = {}", semicolonIndex);
+        String token = tokenWithParams.substring(0, semicolonIndex);
+//        log.info("token = {}", token);
+        return token;
+    }
+
 }
