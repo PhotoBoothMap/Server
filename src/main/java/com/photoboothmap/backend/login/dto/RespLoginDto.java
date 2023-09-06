@@ -14,7 +14,6 @@ public class RespLoginDto {
     public HttpHeaders getHeaders() {
         return headers;
     }
-
     public LoginDto getLoginDto() {
         return loginDto;
     }

@@ -6,6 +6,7 @@ import com.photoboothmap.backend.login.authentication.infra.kakao.KakaoLoginPara
 import com.photoboothmap.backend.login.authentication.service.AuthService;
 import com.photoboothmap.backend.login.dto.LoginDto;
 import com.photoboothmap.backend.login.dto.RespLoginDto;
+import com.photoboothmap.backend.login.dto.RespReissueDto;
 import com.photoboothmap.backend.login.dto.SuccessDto;
 import com.photoboothmap.backend.login.member.domain.MemberRepository;
 import com.photoboothmap.backend.util.config.BaseException;
@@ -49,7 +50,9 @@ public class AuthController {
 
         AuthTokens.TokenDto reissuedTokenDto = authService.reissue(requestAccessToken, requestRefreshToken);
 
-        SuccessDto successDto;
+//        SuccessDto successDto;
+        RespReissueDto respReissueDto;
+
         if (reissuedTokenDto != null) { // 토큰 재발급 성공
             // RT 저장
             ResponseCookie responseCookie = ResponseCookie.from("refresh-token", reissuedTokenDto.getRefreshToken())
@@ -60,14 +63,18 @@ public class AuthController {
                     .httpOnly(true)
                     .secure(true)
                     .build();
-            // success true
-            successDto = SuccessDto.builder().success(true).build();
+            // success true - change body
+//            successDto = SuccessDto.builder().success(true).build();
+            System.out.println("reissuedTokenDto.getAccessToken() : "+reissuedTokenDto.getAccessToken());
+
+            respReissueDto = RespReissueDto.builder().success(true).accessToken(reissuedTokenDto.getAccessToken()).build();
+
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                     // AT 저장
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + reissuedTokenDto.getAccessToken())
-                    .body(successDto);
+                    .body(respReissueDto);
 //                    .build();
 
         } else { // Refresh Token 탈취 가능성
@@ -77,12 +84,12 @@ public class AuthController {
                     .path("/")
                     .build();
             // success false
-            successDto = SuccessDto.builder().success(false).build();
+            respReissueDto = RespReissueDto.builder().success(true).build();
 
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                    .body(successDto);
+                    .body(respReissueDto);
 //                    .build();
         }
     }
