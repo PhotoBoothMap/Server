@@ -16,7 +16,7 @@ public class HomeController {
 
     @GetMapping
     public String healthCheck(){
-        return "Hello World!!";
+        return "Hello World!";
     }
 
     @GetMapping("/responseTest")
